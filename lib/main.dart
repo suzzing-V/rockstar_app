@@ -1,6 +1,7 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ruletherock_app/page/phonenum_input_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -84,7 +85,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       textStyle: TextStyle(fontSize: 20),
                     ),
                     onPressed: () {
-                      // TODO: 버튼1 액션
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                PhonenumInputPage(isNew: true)),
+                      );
                     },
                     child: Text('시작하기',
                         style: TextStyle(
@@ -100,7 +106,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       textStyle: TextStyle(fontSize: 20),
                     ),
                     onPressed: () {
-                      // TODO: 버튼2 액션
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                PhonenumInputPage(isNew: false)),
+                      );
                     },
                     child: Text('로그인',
                         style: TextStyle(
