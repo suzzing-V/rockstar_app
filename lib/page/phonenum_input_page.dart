@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:rockstar_app/api/api_call.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
 import 'package:rockstar_app/page/new_user_page.dart';
+import 'package:rockstar_app/page/not_new_user_page.dart';
 import 'package:rockstar_app/page/verification_page.dart';
 
 class PhonenumInputPage extends StatefulWidget {
@@ -120,8 +121,9 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      Placeholder()), // 이미 가입한 유저
+                                  builder: (context) => NotNewUserPage(
+                                        phonenum: phonenum,
+                                      )), // 이미 가입한 유저
                             );
                           } else if (response.statusCode == 404) {
                             Navigator.push(

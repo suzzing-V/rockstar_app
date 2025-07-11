@@ -230,13 +230,6 @@ class _VerificationPageState extends State<VerificationPage> {
                                 _remainingSeconds = 10;
                                 _startTimer();
                                 print('인증번호 전송 성공: ${responseBody}');
-                              } else if (response.statusCode == 400) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          Placeholder()), // 이미 가입한 유저
-                                );
                               } else {
                                 setState(() {
                                   errorMessage = '인증번호를 보내지 못했습니다.';

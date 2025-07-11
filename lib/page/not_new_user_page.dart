@@ -7,16 +7,16 @@ import 'package:rockstar_app/api/api_call.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
 import 'package:rockstar_app/page/verification_page.dart';
 
-class NewUserPage extends StatefulWidget {
+class NotNewUserPage extends StatefulWidget {
   final String phonenum;
 
-  const NewUserPage({super.key, required this.phonenum});
+  const NotNewUserPage({super.key, required this.phonenum});
 
   @override
-  State<NewUserPage> createState() => _NewUserPageState();
+  State<NotNewUserPage> createState() => _NotNewUserPageState();
 }
 
-class _NewUserPageState extends State<NewUserPage> {
+class _NotNewUserPageState extends State<NotNewUserPage> {
   String? errorMessage;
 
   @override
@@ -36,7 +36,7 @@ class _NewUserPageState extends State<NewUserPage> {
                 mainAxisAlignment: MainAxisAlignment.start, // 수직 위 정렬
                 children: [
                   Text(
-                    '가입 내역이 없습니다.',
+                    '이미 가입한 사용자입니다.',
                     style: TextStyle(
                       fontFamily: 'PixelFont',
                       color: Theme.of(context).colorScheme.secondaryContainer,
@@ -74,7 +74,7 @@ class _NewUserPageState extends State<NewUserPage> {
                           headers: {'Content-Type': 'application/json'},
                           body: jsonEncode({
                             'phoneNum': widget.phonenum,
-                            'isNew': true,
+                            'isNew': false,
                           }),
                         );
 
@@ -85,7 +85,7 @@ class _NewUserPageState extends State<NewUserPage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => VerificationPage(
-                                    isNew: true, phonenum: widget.phonenum)),
+                                    isNew: false, phonenum: widget.phonenum)),
                           );
                         } else {
                           setState(() {
@@ -95,7 +95,7 @@ class _NewUserPageState extends State<NewUserPage> {
                           print('인증번호 전송 실패: ${response.body}');
                         }
                       },
-                      child: Text('이 번호로 가입',
+                      child: Text('이 번호로 로그인',
                           style: TextStyle(
                             fontFamily: 'PixelFont',
                           )),
