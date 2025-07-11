@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 class PhonenumInputPage extends StatefulWidget {
   final bool isNew;
@@ -22,6 +25,8 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isNew = widget.isNew;
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       body: SafeArea(
@@ -79,12 +84,43 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                               horizontal: 32, vertical: 16),
                           textStyle: TextStyle(fontSize: 18),
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Placeholder()),
+                        onPressed: () async {
+                          final phonenum = _controller.text.trim();
+                          final url = Uri.parse(
+                              "http://3.34.183.135/api/v0/user/verification-code");
+                          final response = await http.post(
+                            url,
+                            headers: {'Content-Type': 'application/json'},
+                            body: jsonEncode({
+                              'phoneNum': phonenum,
+                              'isNew': isNew,
+                            }),
                           );
+
+                          if (response.statusCode == 200) {
+                            final responseBody = jsonDecode(response.body);
+                            print('인증번호 전송 성공: ${responseBody}');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Placeholder()),
+                            );
+                          } else if (response.statusCode == 400) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      Placeholder()), // 이미 가입한 유저
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      Placeholder()), // 오류 발생 페이지
+                            );
+                            print('인증번호 전송 실패: ${response.body}');
+                          }
                         },
                         child: Text('인증번호 보내기',
                             style: TextStyle(
