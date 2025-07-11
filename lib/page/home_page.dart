@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 40),
               child: Image.asset(
-                'assets/rtr_logo.png',
+                'assets/logo/rockstar_logo.png',
                 width: 300,
                 height: 300,
               ),
@@ -96,9 +96,9 @@ class _AnimatedLandingPageState extends State<AnimatedLandingPage> {
               ),
               curve: Curves.easeOut,
               child: Image.asset(
-                'assets/rtr_logo.png',
-                width: 300,
-                height: 300,
+                'assets/logo/rockstar_logo.png',
+                width: 270,
+                height: 270,
               ),
             ),
             AnimatedOpacity(
@@ -126,7 +126,7 @@ class _AnimatedLandingPageState extends State<AnimatedLandingPage> {
                           fontFamily: 'PixelFont',
                         )),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 20),
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       minimumSize: Size(250, 60), // 버튼 자체 크기

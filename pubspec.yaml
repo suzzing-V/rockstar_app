@@ -26,7 +26,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/rtr_logo.png
+    - assets/logo/rockstar_logo.png
   fonts:
     - family: PixelFont
       fonts:

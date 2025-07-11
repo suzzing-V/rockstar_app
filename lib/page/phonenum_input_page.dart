@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:rockstar_app/api/api_call.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
+import 'package:rockstar_app/page/new_user_page.dart';
 import 'package:rockstar_app/page/verification_page.dart';
 
 class PhonenumInputPage extends StatefulWidget {
@@ -59,9 +60,9 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                     controller: _controller,
                     keyboardType: TextInputType.number,
                     onChanged: _onChange,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
+                    // inputFormatters: [
+                    //   FilteringTextInputFormatter.digitsOnly,
+                    // ],
                     style: TextStyle(
                       fontFamily: 'PixelFont',
                       color: Theme.of(context).colorScheme.secondaryContainer,
@@ -126,7 +127,8 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => Placeholder()), // 새 유저
+                                  builder: (context) =>
+                                      NewUserPage(phonenum: phonenum)), // 새 유저
                             );
                           } else {
                             setState(() {
