@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/page/verification_page.dart';
 
 class PhonenumInputPage extends StatefulWidget {
   final bool isNew;
@@ -103,7 +105,7 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                         onPressed: () async {
                           final phonenum = _controller.text.trim();
                           final url = Uri.parse(
-                              "http://3.34.183.135/api/v0/user/verification-code");
+                              "http://${ApiCall.host}/api/v0/user/verification-code");
                           final response = await http.post(
                             url,
                             headers: {'Content-Type': 'application/json'},
@@ -119,7 +121,8 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => Placeholder()),
+                                  builder: (context) => VerificationPage(
+                                      isNew: widget.isNew, phonenum: phonenum)),
                             );
                           } else if (response.statusCode == 400) {
                             Navigator.push(
@@ -127,6 +130,12 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                               MaterialPageRoute(
                                   builder: (context) =>
                                       Placeholder()), // 이미 가입한 유저
+                            );
+                          } else if (response.statusCode == 404) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Placeholder()), // 새 유저
                             );
                           } else {
                             setState(() {

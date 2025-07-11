@@ -1,11 +1,11 @@
 {
-    "name": "ruletherock_app",
-    "short_name": "ruletherock_app",
+    "name": "rockstar_app",
+    "short_name": "rockstar_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "이 시대의 밴드맨이라면.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

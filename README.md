@@ -1,6 +1,6 @@
-# ruletherock_app
+# rockstar_app
 
-A new Flutter project.
+이 시대의 밴드맨이라면.
 
 ## Getting Started
 

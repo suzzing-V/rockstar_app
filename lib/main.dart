@@ -1,29 +1,53 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ruletherock_app/page/phonenum_input_page.dart';
+import 'package:rockstar_app/page/phonenum_input_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  // TO
+  // final accessToken = prefs.getString('accessToken');
+  // final refreshToken = prefs.getString('refreshToken');
+  final accessToken = null;
+  final refreshToken = null;
+
+  print(accessToken);
+  runApp(MyApp(isLoggedIn: accessToken != null && refreshToken != null));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Rule The Rock',
+        title: 'Rockstar',
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 41, 15, 64)),
         ),
-        home: MyHomePage(),
+        home: SplashRouterPage(isLoggedIn: isLoggedIn),
       ),
     );
+  }
+}
+
+class SplashRouterPage extends StatelessWidget {
+  final bool isLoggedIn;
+
+  const SplashRouterPage({super.key, required this.isLoggedIn});
+
+  @override
+  Widget build(BuildContext context) {
+    // 로그인 되어 있으면 바로 HomePage, 아니면 애니메이션 페이지
+    return isLoggedIn ? HomePage() : AnimatedLandingPage();
   }
 }
 
@@ -31,12 +55,59 @@ class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
 }
 
-class MyHomePage extends StatefulWidget {
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Placeholder(), // 홈화면
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Image.asset(
+                'assets/rtr_logo.png',
+                width: 300,
+                height: 300,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AnimatedLandingPage extends StatefulWidget {
+  @override
+  State<AnimatedLandingPage> createState() => _AnimatedLandingPageState();
+}
+
+class _AnimatedLandingPageState extends State<AnimatedLandingPage> {
   bool _showButtons = false;
 
   @override

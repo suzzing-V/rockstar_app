@@ -1,4 +1,4 @@
-package com.example.ruletherock_app
+package com.example.rockstar_app
 
 import io.flutter.embedding.android.FlutterActivity
 
