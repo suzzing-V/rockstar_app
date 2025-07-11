@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/button/custom_back_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VerificationPage extends StatefulWidget {
@@ -37,7 +38,7 @@ class _VerificationPageState extends State<VerificationPage> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // ✅ 타이머 정리
+    _timer.cancel(); // ✅ 타이머 정리
     super.dispose();
   }
 
@@ -69,17 +70,7 @@ class _VerificationPageState extends State<VerificationPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ✅ 뒤로가기 버튼은 Padding 밖
-            Padding(
-              padding: const EdgeInsets.all(5), // 여백을 줘서 너무 붙지 않게
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new),
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                iconSize: 23,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
+            CustomBackButton(),
             Padding(
               padding: const EdgeInsets.all(40), // 여백을 줘서 너무 붙지 않게
               child: Column(
@@ -186,7 +177,7 @@ class _VerificationPageState extends State<VerificationPage> {
                               await prefs.setString(
                                   'refreshToken', refreshToken);
 
-                              print('인증 성공: ${responseBody}');
+                              print('인증 성공: $responseBody');
                               if (widget.isNew) {
                                 Navigator.push(
                                   context,

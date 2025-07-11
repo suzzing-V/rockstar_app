@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/button/custom_back_button.dart';
 import 'package:rockstar_app/page/verification_page.dart';
 
 class PhonenumInputPage extends StatefulWidget {
@@ -38,17 +39,7 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ✅ 뒤로가기 버튼은 Padding 밖
-            Padding(
-              padding: const EdgeInsets.all(10), // 여백을 줘서 너무 붙지 않게
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new),
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                iconSize: 23,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
+            CustomBackButton(),
             Padding(
               padding: const EdgeInsets.all(40), // 여백을 줘서 너무 붙지 않게
               child: Column(
