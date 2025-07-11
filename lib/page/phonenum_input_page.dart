@@ -16,10 +16,12 @@ class PhonenumInputPage extends StatefulWidget {
 class _PhonenumInputPageState extends State<PhonenumInputPage> {
   final _controller = TextEditingController();
   bool isValid = false;
+  String? errorMessage;
 
   void _onChange(String value) {
     setState(() {
       isValid = value.length == 11;
+      errorMessage = null;
     });
   }
 
@@ -73,7 +75,21 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                       fontSize: 23,
                     ),
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 10),
+                  SizedBox(
+                    height: 20, // ✅ 항상 20px 공간 확보 (텍스트 높이에 맞게 조절)
+                    child: errorMessage != null
+                        ? Text(
+                            errorMessage!,
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 14,
+                              fontFamily: 'PixelFont',
+                            ),
+                          )
+                        : null, // 메시지 없을 땐 비움 (공간만 차지)
+                  ),
+                  SizedBox(height: 20),
                   if (isValid)
                     Align(
                       alignment: Alignment.center,
@@ -113,12 +129,10 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                                       Placeholder()), // 이미 가입한 유저
                             );
                           } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      Placeholder()), // 오류 발생 페이지
-                            );
+                            setState(() {
+                              errorMessage = '인증번호를 보내지 못했습니다.';
+                            });
+
                             print('인증번호 전송 실패: ${response.body}');
                           }
                         },
