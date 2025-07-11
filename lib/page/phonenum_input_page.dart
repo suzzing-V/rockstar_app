@@ -61,9 +61,10 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                     controller: _controller,
                     keyboardType: TextInputType.number,
                     onChanged: _onChange,
-                    // inputFormatters: [
-                    //   FilteringTextInputFormatter.digitsOnly,
-                    // ],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
                     style: TextStyle(
                       fontFamily: 'PixelFont',
                       color: Theme.of(context).colorScheme.secondaryContainer,
