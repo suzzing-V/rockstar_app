@@ -191,7 +191,7 @@ class _VerificationPageState extends State<VerificationPage> {
                                           NicknamePage()), // 닉네임 입력
                                 );
                               } else {
-                                Navigator.push(
+                                Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => HomePage()), // 홈
