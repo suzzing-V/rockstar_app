@@ -15,18 +15,18 @@ class SplashRouterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 로그인 되어 있으면 바로 HomePage, 아니면 애니메이션 페이지
-    return isLoggedIn ? HomePage() : AnimatedLandingPage();
+    return isLoggedIn ? StartPage() : AnimatedStartPage();
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class StartPage extends StatefulWidget {
+  const StartPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<StartPage> createState() => _StartPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _StartPageState extends State<StartPage> {
   @override
   void initState() {
     super.initState();
@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => AnimatedLandingPage(), // 홈화면
+            builder: (context) => AnimatedStartPage(), // 홈화면
           ),
         );
       }
@@ -101,12 +101,12 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class AnimatedLandingPage extends StatefulWidget {
+class AnimatedStartPage extends StatefulWidget {
   @override
-  State<AnimatedLandingPage> createState() => _AnimatedLandingPageState();
+  State<AnimatedStartPage> createState() => _AnimatedStartPageState();
 }
 
-class _AnimatedLandingPageState extends State<AnimatedLandingPage> {
+class _AnimatedStartPageState extends State<AnimatedStartPage> {
   bool _showButtons = false;
 
   @override
