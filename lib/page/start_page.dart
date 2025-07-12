@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/page/home_page.dart';
 import 'package:rockstar_app/page/nickname_page.dart';
 import 'package:rockstar_app/page/phonenum_input_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -63,7 +64,7 @@ class _StartPageState extends State<StartPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => AnimatedStartPage(), // 홈화면
+            builder: (context) => AnimatedStartPage(),
           ),
         );
       }
@@ -71,7 +72,7 @@ class _StartPageState extends State<StartPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => Placeholder(), // 홈화면
+            builder: (context) => HomePage(), // 홈화면
           ),
         );
       }

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:rockstar_app/api/api_call.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
+import 'package:rockstar_app/page/home_page.dart';
 import 'package:rockstar_app/page/nickname_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -182,6 +183,7 @@ class _VerificationPageState extends State<VerificationPage> {
                               print(widget.isNew);
                               print('인증 성공: $responseBody');
                               if (nickname == null) {
+                                print('닉네임 없음');
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -192,8 +194,7 @@ class _VerificationPageState extends State<VerificationPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          NicknamePage()), // 홈
+                                      builder: (context) => HomePage()), // 홈
                                 );
                               }
                             } else if (statusCodeName ==

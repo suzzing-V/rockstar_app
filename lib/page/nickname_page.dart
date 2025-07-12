@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:rockstar_app/api/api_call.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
+import 'package:rockstar_app/page/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NicknamePage extends StatefulWidget {
@@ -117,7 +118,7 @@ class _NicknamePageState extends State<NicknamePage> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => Placeholder(), // 홈화면
+                                builder: (context) => HomePage(), // 홈화면
                               ),
                             );
                           } else if (response.statusCode == 400) {
