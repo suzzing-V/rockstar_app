@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/page/nickname_page.dart';
 import 'package:rockstar_app/page/phonenum_input_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashRouterPage extends StatelessWidget {
   final bool isLoggedIn;
@@ -25,7 +31,42 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 1), () async {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken');
+
+      final url = Uri.parse("http://${ApiCall.host}/api/v0/user");
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken'
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final decoded =
+            jsonDecode(utf8.decode(response.bodyBytes)); // ✅ UTF-8 보장
+        final nickname = decoded['nickname'];
+        print('유저 조회 성공: $decoded');
+
+        if (nickname == null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NicknamePage(),
+            ),
+          );
+          return;
+        }
+      } else if (response.statusCode == 404) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnimatedLandingPage(), // 홈화면
+          ),
+        );
+      }
       if (mounted) {
         Navigator.pushReplacement(
           context,

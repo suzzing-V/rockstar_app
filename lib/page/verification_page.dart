@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:rockstar_app/api/api_call.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
+import 'package:rockstar_app/page/nickname_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VerificationPage extends StatefulWidget {
@@ -165,6 +166,7 @@ class _VerificationPageState extends State<VerificationPage> {
                             final decoded = jsonDecode(
                                 utf8.decode(response.bodyBytes)); // ✅ UTF-8 보장
                             final statusCodeName = decoded['code'];
+                            final nickname = decoded['nickname'];
 
                             if (response.statusCode == 200) {
                               final responseBody = jsonDecode(response.body);
@@ -177,19 +179,21 @@ class _VerificationPageState extends State<VerificationPage> {
                               await prefs.setString(
                                   'refreshToken', refreshToken);
 
+                              print(widget.isNew);
                               print('인증 성공: $responseBody');
-                              if (widget.isNew) {
+                              if (nickname == null) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          Placeholder()), // 닉네임 입력
+                                          NicknamePage()), // 닉네임 입력
                                 );
                               } else {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => Placeholder()), // 홈
+                                      builder: (context) =>
+                                          NicknamePage()), // 홈
                                 );
                               }
                             } else if (statusCodeName ==
@@ -229,7 +233,7 @@ class _VerificationPageState extends State<VerificationPage> {
                                 final responseBody = jsonDecode(response.body);
                                 _remainingSeconds = 10;
                                 _startTimer();
-                                print('인증번호 전송 성공: ${responseBody}');
+                                print('인증번호 전송 성공: $responseBody');
                               } else {
                                 setState(() {
                                   errorMessage = '인증번호를 보내지 못했습니다.';
