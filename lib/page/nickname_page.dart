@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
 import 'package:rockstar_app/page/home_page.dart';
+import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NicknamePage extends StatefulWidget {
@@ -96,21 +96,8 @@ class _NicknamePageState extends State<NicknamePage> {
                             errorMessage = '닉네임을 입력해주세요';
                           });
                         } else {
-                          final prefs = await SharedPreferences.getInstance();
-                          final accessToken = prefs.getString('accessToken');
-
-                          final url = Uri.parse(
-                              "http://${ApiCall.host}/api/v0/user/nickname");
-                          final response = await http.patch(
-                            url,
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'Authorization': 'Bearer $accessToken'
-                            },
-                            body: jsonEncode({
-                              'nickname': nickname,
-                            }),
-                          );
+                          final response =
+                              await UserService.updateNickname(nickname);
 
                           if (response.statusCode == 200) {
                             final responseBody = jsonDecode(response.body);
@@ -125,6 +112,37 @@ class _NicknamePageState extends State<NicknamePage> {
                             setState(() {
                               errorMessage = '이미 사용 중인 닉네임입니다.';
                             });
+                          } else if (response.statusCode == 401) {
+                            final response = await UserService.reissueToken();
+
+                            if (response.statusCode == 200) {
+                              final decoded =
+                                  jsonDecode(utf8.decode(response.bodyBytes));
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setString(
+                                  'accessToken', decoded['accessToken']);
+                              await prefs.setString(
+                                  'refreshToken', decoded['refreshToken']);
+
+                              /// ✅ 토큰 재발급 성공 후 재시도
+                              final retry =
+                                  await UserService.updateNickname(nickname);
+                              if (retry.statusCode != 200) {
+                                // TODO: 오류 발생 시 행동
+                              }
+                            } else if (response.statusCode == 401) {
+                              // refresh token 만료 시
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AnimatedStartPage(),
+                                ),
+                              );
+                              return;
+                            } else {
+                              // TODO: 서버 오류 시 행동
+                            }
                           } else {
                             setState(() {
                               errorMessage = '닉네임을 등록하지 못했습니다.';

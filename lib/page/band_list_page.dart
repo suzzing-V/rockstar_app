@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/api/band_service.dart';
+import 'package:rockstar_app/api/user_service.dart';
+import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandListPage extends StatefulWidget {
@@ -19,21 +20,11 @@ class _BandListPageState extends State<BandListPage> {
   @override
   void initState() {
     super.initState();
-    fetchMyBands();
+    getMyBands();
   }
 
-  Future<void> fetchMyBands() async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accessToken');
-
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/user");
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
+  Future<void> getMyBands() async {
+    final response = await BandService.getMyBandList();
 
     if (response.statusCode == 200) {
       final List decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -46,16 +37,34 @@ class _BandListPageState extends State<BandListPage> {
       setState(() {
         myBands = decoded.cast<Map<String, dynamic>>();
       });
-      // TODO: 토큰 재발급 구현
-      // } else if (response.statusCode == 401) {
-      //   // final refreshTokenUrl = Uri.parse("http://${ApiCall.host}/api/v0/band/user");
-      //   // final refreshResponse = await http.get(
-      //   // url,
-      //   headers: {
-      //     'Authorization': 'Bearer $accessToken',
-      //   },
-      // );
+    } else if (response.statusCode == 401) {
+      final response = await UserService.reissueToken();
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', decoded['accessToken']);
+        await prefs.setString('refreshToken', decoded['refreshToken']);
+
+        /// ✅ 토큰 재발급 성공 후 재시도
+        final retry = await BandService.getMyBandList();
+        if (retry.statusCode != 200) {
+          // TODO: 오류 시 행동
+        }
+      } else if (response.statusCode == 401) {
+        // refresh token 만료 시
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnimatedStartPage(),
+          ),
+        );
+        return;
+      } else {
+        // TODO: 오류 시 행동
+      }
     } else {
+      // TODO: 서버 오류 시 행동
       print("밴드 목록 불러오기 실패: ${jsonDecode(utf8.decode(response.bodyBytes))}");
     }
   }

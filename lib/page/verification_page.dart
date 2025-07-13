@@ -3,11 +3,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
 import 'package:rockstar_app/page/home_page.dart';
 import 'package:rockstar_app/page/nickname_page.dart';
+import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VerificationPage extends StatefulWidget {
@@ -152,17 +152,8 @@ class _VerificationPageState extends State<VerificationPage> {
                           ),
                           onPressed: () async {
                             final code = _controller.text.trim();
-                            final url = Uri.parse(
-                                "http://${ApiCall.host}/api/v0/user/login");
-                            final response = await http.post(
-                              url,
-                              headers: {'Content-Type': 'application/json'},
-                              body: jsonEncode({
-                                'code': code,
-                                'phoneNum': widget.phonenum,
-                                'isNew': widget.isNew,
-                              }),
-                            );
+                            final response = await UserService.login(
+                                code, widget.phonenum, widget.isNew);
 
                             final decoded = jsonDecode(
                                 utf8.decode(response.bodyBytes)); // ✅ UTF-8 보장
@@ -190,6 +181,38 @@ class _VerificationPageState extends State<VerificationPage> {
                                       builder: (context) =>
                                           NicknamePage()), // 닉네임 입력
                                 );
+                              } else if (response.statusCode == 401) {
+                                final response =
+                                    await UserService.reissueToken();
+
+                                if (response.statusCode == 200) {
+                                  final decoded = jsonDecode(
+                                      utf8.decode(response.bodyBytes));
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.setString(
+                                      'accessToken', decoded['accessToken']);
+                                  await prefs.setString(
+                                      'refreshToken', decoded['refreshToken']);
+
+                                  /// ✅ 토큰 재발급 성공 후 재시도
+                                  final retry = await UserService.login(
+                                      code, widget.phonenum, widget.isNew);
+                                  if (retry.statusCode != 200) {
+                                    // TODO: 오류 발생 시 행동
+                                  }
+                                } else if (response.statusCode == 401) {
+                                  // refresh token 만료 시
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AnimatedStartPage(),
+                                    ),
+                                  );
+                                  return;
+                                } else {
+                                  // TODO: 서버 오류 시 행동
+                                }
                               } else {
                                 Navigator.pushReplacement(
                                   context,
@@ -219,22 +242,46 @@ class _VerificationPageState extends State<VerificationPage> {
                         SizedBox(height: 10),
                         InkWell(
                             onTap: () async {
-                              final url = Uri.parse(
-                                  "http://${ApiCall.host}/api/v0/user/verification-code");
-                              final response = await http.post(
-                                url,
-                                headers: {'Content-Type': 'application/json'},
-                                body: jsonEncode({
-                                  'phoneNum': widget.phonenum,
-                                  'isNew': widget.isNew,
-                                }),
-                              );
+                              final response = await UserService.requestCode(
+                                  widget.phonenum, widget.isNew);
 
                               if (response.statusCode == 200) {
                                 final responseBody = jsonDecode(response.body);
                                 _remainingSeconds = 10;
                                 _startTimer();
                                 print('인증번호 전송 성공: $responseBody');
+                              } else if (response.statusCode == 401) {
+                                final response =
+                                    await UserService.reissueToken();
+
+                                if (response.statusCode == 200) {
+                                  final decoded = jsonDecode(
+                                      utf8.decode(response.bodyBytes));
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.setString(
+                                      'accessToken', decoded['accessToken']);
+                                  await prefs.setString(
+                                      'refreshToken', decoded['refreshToken']);
+
+                                  /// ✅ 토큰 재발급 성공 후 재시도
+                                  final retry = await UserService.requestCode(
+                                      widget.phonenum, widget.isNew);
+                                  if (retry.statusCode != 200) {
+                                    // TODO: 오류 발생 시 행동
+                                  }
+                                } else if (response.statusCode == 401) {
+                                  // refresh token 만료 시
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AnimatedStartPage(),
+                                    ),
+                                  );
+                                  return;
+                                } else {
+                                  // TODO: 서버 오류 시 행동
+                                }
                               } else {
                                 setState(() {
                                   errorMessage = '인증번호를 보내지 못했습니다.';

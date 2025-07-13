@@ -1,14 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:rockstar_app/api/api_call.dart';
-import 'package:rockstar_app/button/custom_back_button.dart';
 import 'package:rockstar_app/page/band_list_page.dart';
-import 'package:rockstar_app/page/new_user_page.dart';
-import 'package:rockstar_app/page/not_new_user_page.dart';
-import 'package:rockstar_app/page/verification_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,7 +9,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _controller = TextEditingController();
   bool isValid = false;
   String? errorMessage;
 
@@ -28,12 +18,6 @@ class _HomePageState extends State<HomePage> {
     BandListPage(), // 홈
     Placeholder(), // 내 정보
   ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
