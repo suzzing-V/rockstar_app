@@ -49,9 +49,9 @@ class _HomePageState extends State<HomePage> {
         actions: [
           Padding(
             padding:
-                const EdgeInsets.only(right: 15), // ← 기본은 16, 8로 줄이면 왼쪽으로 붙음
+                const EdgeInsets.only(right: 5), // ← 기본은 16, 8로 줄이면 왼쪽으로 붙음
             child: IconButton(
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add_rounded),
               color: Theme.of(context).colorScheme.primaryFixed,
               iconSize: 40,
               onPressed: () => {
@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: Icon(
                       iconData,
-                      size: isSelected ? 30 : 28,
+                      size: 31,
                       color: isSelected
                           ? Theme.of(context).colorScheme.onPrimaryContainer
                           : Colors.grey,

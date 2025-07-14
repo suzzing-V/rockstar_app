@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api_call.dart';
@@ -72,6 +73,20 @@ class UserService {
         'phoneNum': phonenum,
         'isNew': isNew,
       }),
+    );
+    return response;
+  }
+
+  static Future<http.Response> getUserInfoInBand(int bandId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/user/band/$bandId");
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken'
+      },
     );
     return response;
   }

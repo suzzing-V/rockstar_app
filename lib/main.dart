@@ -27,6 +27,7 @@ void main() async {
 
       prefs.setString('accessToken', decoded['accessToken']);
       prefs.setString('refreshToken', decoded['refreshToken']);
+
       accessToken = decoded['accessToken'];
       refreshToken = decoded['refreshToken'];
     } else if (response.statusCode == 401) {

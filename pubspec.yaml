@@ -30,6 +30,7 @@ flutter:
     - assets/logo/rockstar_logo.png
     - assets/logo/rockstar_icon.png
     - assets/logo/rockstar_text.png
+    - assets/logo/crown.png
   fonts:
     - family: PixelFont
       fonts:
