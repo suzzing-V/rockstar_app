@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rockstar_app/api/band_service.dart';
 import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/page/create_band_page.dart';
@@ -17,6 +18,7 @@ class BandListPage extends StatefulWidget {
 class _BandListPageState extends State<BandListPage> {
   List<Map<String, dynamic>> myBands = [];
   bool isEmptyList = false;
+  bool isManager = false;
 
   @override
   void initState() {
@@ -119,6 +121,12 @@ class _BandListPageState extends State<BandListPage> {
                                   fontSize: 20,
                                 ),
                               ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              if (band['isManager'])
+                                Icon(FontAwesomeIcons.crown,
+                                    size: 23, color: Colors.amber)
                             ],
                           ),
                         ),
