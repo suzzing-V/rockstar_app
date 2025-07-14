@@ -28,6 +28,7 @@ class _BandPageState extends State<BandPage> {
   final List<Widget> _pages = [
     Placeholder(), // 일정
     Placeholder(), // 소식
+    Placeholder(), // 멤버
   ];
 
   @override
@@ -41,8 +42,10 @@ class _BandPageState extends State<BandPage> {
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-      nickname = decoded['nickname'];
-      isManager = decoded['isManager'];
+      setState(() {
+        nickname = decoded['nickname'];
+        isManager = decoded['isManager'];
+      });
       print("유저 정보 불러오기 성공: $decoded");
     } else if (response.statusCode == 401) {
       final response = await UserService.reissueToken();
@@ -205,7 +208,7 @@ class _BandPageState extends State<BandPage> {
       ),
       body: SafeArea(child: _pages[_selectedIndex]),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 110, right: 110, bottom: 40),
+        padding: const EdgeInsets.only(left: 64.5, right: 64.5, bottom: 40),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(50),
           child: Container(
@@ -216,10 +219,13 @@ class _BandPageState extends State<BandPage> {
                 .withOpacity(0.8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(2, (index) {
+              children: List.generate(3, (index) {
                 final isSelected = _selectedIndex == index;
-                final iconData =
-                    index == 0 ? Icons.calendar_month : Icons.campaign;
+                final iconData = [
+                  Icons.calendar_month,
+                  Icons.campaign,
+                  Icons.group, // 👥 멤버 아이콘
+                ][index];
 
                 return GestureDetector(
                   onTap: () => setState(() => _selectedIndex = index),
