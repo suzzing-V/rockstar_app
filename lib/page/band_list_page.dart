@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/api/band_service.dart';
 import 'package:rockstar_app/api/user_service.dart';
+import 'package:rockstar_app/page/create_band_page.dart';
 import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -148,7 +149,7 @@ class _BandListPageState extends State<BandListPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) =>
-                                    const Placeholder(), // 밴드 생성 페이지
+                                    const CreateBandPage(), // 밴드 생성 페이지
                               ),
                             );
                           },

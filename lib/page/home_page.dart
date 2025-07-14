@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/page/band_list_page.dart';
+import 'package:rockstar_app/page/create_band_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -49,10 +50,17 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding:
                 const EdgeInsets.only(right: 15), // ← 기본은 16, 8로 줄이면 왼쪽으로 붙음
-            child: Icon(
-              Icons.add,
+            child: IconButton(
+              icon: const Icon(Icons.add),
               color: Theme.of(context).colorScheme.primaryFixed,
-              size: 40,
+              iconSize: 40,
+              onPressed: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CreateBandPage()), // 밴드 상세 페이지
+                )
+              },
             ),
           ),
         ],
