@@ -85,14 +85,14 @@ class _StartPageState extends State<StartPage> {
       } else {
         // TODO: 서버 오류 시 행동
       }
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(), // 홈화면
-          ),
-        );
-      }
+      // if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(), // 홈화면
+        ),
+      );
+      // }
     });
   }
 

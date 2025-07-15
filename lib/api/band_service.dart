@@ -19,6 +19,21 @@ class BandService {
     );
   }
 
+  static Future<http.Response> getBandSchedules(int bandId, int page) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse(
+        "http://${ApiCall.host}/api/v0/schedule/band/$bandId?page=$page&size=20");
+
+    return http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+  }
+
   static Future<http.Response> createBand(String bandName) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');

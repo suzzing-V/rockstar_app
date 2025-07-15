@@ -78,112 +78,107 @@ class _BandListPageState extends State<BandListPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 40),
-        if (!isEmptyList)
-          Expanded(
-            child: ListView.builder(
-                itemCount: myBands.length + 1,
-                itemBuilder: (context, index) {
-                  if (index < myBands.length) {
-                    final band = myBands[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 30),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: FilledButton.tonal(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .secondaryContainer
-                                .withOpacity(0.8),
-                            minimumSize: Size(350, 80), // 버튼 자체 크기
-                            maximumSize: Size(350, 80),
-                            textStyle: TextStyle(fontSize: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () async {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => BandPage(
-                                      bandId: band['bandId'],
-                                      bandName: band['bandName'])), // 밴드 상세 페이지
-                            );
-                          },
-                          child: Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.start, // ✅ 왼쪽 정렬
-                            children: [
-                              Text(
-                                band['bandName'],
-                                style: TextStyle(
-                                  fontFamily: 'PixelFont',
-                                  fontSize: 20,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              if (band['isManager'])
-                                Icon(FontAwesomeIcons.crown,
-                                    size: 20, color: Colors.amber)
-                              // Image.asset(
-                              //   'assets/logo/crown.png',
-                              //   width: 25,
-                              //   height: 25,
-                              // ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  } else {
-                    return Column(children: [
-                      Align(
-                        alignment: Alignment.center,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: Size(300, 60),
-                            maximumSize: Size(300, 60),
-                            side: BorderSide(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .secondaryContainer
-                                  .withOpacity(0.8),
-                              width: 3,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            backgroundColor: Colors.transparent,
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    const CreateBandPage(), // 밴드 생성 페이지
-                              ),
-                            );
-                          },
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.add,
-                              color: Theme.of(context).colorScheme.primaryFixed,
-                              size: 40,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ]);
-                  }
-                }),
+        Padding(
+          padding: EdgeInsets.only(bottom: 30, top: 20),
+          child: Align(
+            alignment: Alignment.center,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                minimumSize: Size(300, 60),
+                maximumSize: Size(300, 60),
+                side: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondaryContainer
+                      .withOpacity(0.8),
+                  width: 3,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                backgroundColor: Colors.transparent,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CreateBandPage(), // 밴드 생성 페이지
+                  ),
+                );
+              },
+              child: Align(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.add,
+                  color: Theme.of(context).colorScheme.primaryFixed,
+                  size: 40,
+                ),
+              ),
+            ),
           ),
-        SizedBox(
-          height: 20,
+        ),
+        // const SizedBox(height: 0),
+        Expanded(
+          child: ListView.builder(
+              // padding: const EdgeInsets.only(top: 20),
+              itemCount: myBands.length + 1,
+              itemBuilder: (context, index) {
+                if (index < myBands.length) {
+                  final band = myBands[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 30),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: FilledButton.tonal(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .secondaryContainer
+                              .withOpacity(0.8),
+                          minimumSize: Size(350, 80), // 버튼 자체 크기
+                          maximumSize: Size(350, 80),
+                          textStyle: TextStyle(fontSize: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => BandPage(
+                                    bandId: band['bandId'],
+                                    bandName: band['bandName'])), // 밴드 상세 페이지
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start, // ✅ 왼쪽 정렬
+                          children: [
+                            Text(
+                              band['bandName'],
+                              style: TextStyle(
+                                fontFamily: 'PixelFont',
+                                fontSize: 23,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            if (band['isManager'])
+                              Icon(FontAwesomeIcons.crown,
+                                  size: 20, color: Colors.amber)
+                            // Image.asset(
+                            //   'assets/logo/crown.png',
+                            //   width: 25,
+                            //   height: 25,
+                            // ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              }),
         ),
       ],
     );
