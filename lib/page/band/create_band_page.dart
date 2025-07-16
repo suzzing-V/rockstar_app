@@ -2,25 +2,28 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rockstar_app/api/band_service.dart';
 import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
-import 'package:rockstar_app/page/home_page.dart';
+import 'package:rockstar_app/page/home/home_page.dart';
 import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class NicknamePage extends StatefulWidget {
-  const NicknamePage({super.key});
+class CreateBandPage extends StatefulWidget {
+  const CreateBandPage({super.key});
 
   @override
-  State<NicknamePage> createState() => _NicknamePageState();
+  State<CreateBandPage> createState() => _CreateBandPageState();
 }
 
-class _NicknamePageState extends State<NicknamePage> {
+class _CreateBandPageState extends State<CreateBandPage> {
   final _controller = TextEditingController();
+  bool isValid = false;
   String? errorMessage;
 
   void _onChange(String value) {
     setState(() {
+      isValid = value.length >= 1;
       errorMessage = null;
     });
   }
@@ -42,7 +45,7 @@ class _NicknamePageState extends State<NicknamePage> {
                 mainAxisAlignment: MainAxisAlignment.start, // 수직 위 정렬
                 children: [
                   Text(
-                    '사용하실 닉네임을 \n입력해주세요',
+                    '밴드 이름을 \n입력해주세요',
                     style: TextStyle(
                       fontFamily: 'PixelFont',
                       color: Theme.of(context).colorScheme.secondaryContainer,
@@ -55,9 +58,7 @@ class _NicknamePageState extends State<NicknamePage> {
                     keyboardType: TextInputType.text,
                     onChanged: _onChange,
                     inputFormatters: [
-                      LengthLimitingTextInputFormatter(20),
-                      FilteringTextInputFormatter.deny(
-                          RegExp(r'\s')), // 공백 문자 차단
+                      LengthLimitingTextInputFormatter(30),
                     ],
                     style: TextStyle(
                       fontFamily: 'PixelFont',
@@ -80,38 +81,29 @@ class _NicknamePageState extends State<NicknamePage> {
                         : null, // 메시지 없을 땐 비움 (공간만 차지)
                   ),
                   SizedBox(height: 20),
-                  Align(
-                    alignment: Alignment.center,
-                    child: FilledButton.tonal(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(220, 55), // 버튼 자체 크기
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                        textStyle: TextStyle(fontSize: 18),
-                      ),
-                      onPressed: () async {
-                        final nickname = _controller.text.trim();
-                        if (nickname.isEmpty) {
-                          setState(() {
-                            errorMessage = '닉네임을 입력해주세요';
-                          });
-                        } else {
+                  if (isValid)
+                    Align(
+                      alignment: Alignment.center,
+                      child: FilledButton.tonal(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(220, 55), // 버튼 자체 크기
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 16),
+                          textStyle: TextStyle(fontSize: 18),
+                        ),
+                        onPressed: () async {
+                          final bandName = _controller.text.trim();
                           final response =
-                              await UserService.updateNickname(nickname);
+                              await BandService.createBand(bandName);
 
                           if (response.statusCode == 200) {
                             final responseBody = jsonDecode(response.body);
-                            print('닉네임 등록 성공: $responseBody');
+                            print('밴드 생성 성공: ${responseBody}');
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => HomePage(), // 홈화면
-                              ),
+                                  builder: (context) => HomePage()),
                             );
-                          } else if (response.statusCode == 400) {
-                            setState(() {
-                              errorMessage = '이미 사용 중인 닉네임입니다.';
-                            });
                           } else if (response.statusCode == 401) {
                             final response = await UserService.reissueToken();
 
@@ -127,7 +119,7 @@ class _NicknamePageState extends State<NicknamePage> {
 
                               /// ✅ 토큰 재발급 성공 후 재시도
                               final retry =
-                                  await UserService.updateNickname(nickname);
+                                  await BandService.createBand(bandName);
                               if (retry.statusCode != 200) {
                                 // TODO: 오류 발생 시 행동
                               }
@@ -144,20 +136,17 @@ class _NicknamePageState extends State<NicknamePage> {
                               // TODO: 서버 오류 시 행동
                             }
                           } else {
-                            setState(() {
-                              errorMessage = '닉네임을 등록하지 못했습니다.';
-                            });
+                            // 오류 시 행동
 
-                            print('닉네임 등록 실패: ${response.body}');
+                            print('밴드 생성 실패: ${response.body}');
                           }
-                        }
-                      },
-                      child: Text('확인',
-                          style: TextStyle(
-                            fontFamily: 'PixelFont',
-                          )),
+                        },
+                        child: Text('확인',
+                            style: TextStyle(
+                              fontFamily: 'PixelFont',
+                            )),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

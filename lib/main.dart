@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +63,15 @@ class MyApp extends StatelessWidget {
               seedColor: const Color.fromARGB(255, 41, 15, 64)),
         ),
         home: SplashRouterPage(isLoggedIn: isLoggedIn),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('ko'), // ✅ 한국어 추가
+          Locale('en'), // 기본 영어
+        ],
       ),
     );
   }

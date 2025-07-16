@@ -1,17 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rockstar_app/api/band_service.dart';
 import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/page/band_page.dart';
-import 'package:rockstar_app/page/create_band_page.dart';
+import 'package:rockstar_app/page/band/create_schedule_page.dart';
 import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandSchedulePage extends StatefulWidget {
   final int bandId;
-  const BandSchedulePage({super.key, required this.bandId});
+  final String bandName;
+
+  const BandSchedulePage(
+      {super.key, required this.bandId, required this.bandName});
 
   @override
   State<BandSchedulePage> createState() => _BandSchedulePageState();
@@ -51,7 +52,11 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
   Future<void> getBandSchedules() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
-
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final refreshToken = prefs.getString('refreshToken');
+    print(accessToken);
+    print('refresh:$refreshToken');
     final response =
         await BandService.getBandSchedules(widget.bandId, _currentPage);
 
@@ -119,7 +124,10 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const Placeholder(), // 일정 생성 페이지
+                    builder: (_) => CreateSchedulePage(
+                      bandId: widget.bandId,
+                      bandName: widget.bandName,
+                    ), // 일정 생성 페이지
                   ),
                 );
               },

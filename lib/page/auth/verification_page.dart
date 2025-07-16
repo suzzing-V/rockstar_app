@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
-import 'package:rockstar_app/page/home_page.dart';
-import 'package:rockstar_app/page/nickname_page.dart';
+import 'package:rockstar_app/page/home/home_page.dart';
+import 'package:rockstar_app/page/auth/nickname_page.dart';
 import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:rockstar_app/page/band_list_page.dart';
-import 'package:rockstar_app/page/create_band_page.dart';
+import 'package:rockstar_app/page/home/band_list_page.dart';
+import 'package:rockstar_app/page/band/create_band_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

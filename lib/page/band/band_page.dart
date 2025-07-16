@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
-import 'package:rockstar_app/page/band_schedule_page.dart';
+import 'package:rockstar_app/page/band/band_schedule_page.dart';
 import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,7 +33,10 @@ class _BandPageState extends State<BandPage> {
   void initState() {
     super.initState();
     _pages = [
-      BandSchedulePage(bandId: widget.bandId), // 일정
+      BandSchedulePage(
+        bandId: widget.bandId,
+        bandName: widget.bandName,
+      ), // 일정
       Placeholder(), // 소식
       Placeholder(), // 멤버
     ];
