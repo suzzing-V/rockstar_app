@@ -17,9 +17,13 @@ class BandListPage extends StatefulWidget {
 }
 
 class _BandListPageState extends State<BandListPage> {
-  List<Map<String, dynamic>> myBands = [];
+  List<Map<String, dynamic>> bands = [];
   bool isEmptyList = false;
   bool isManager = false;
+  int _currentPage = 0;
+  bool _isLoading = false;
+  bool _hasMore = true;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -27,50 +31,61 @@ class _BandListPageState extends State<BandListPage> {
     getMyBands();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (_hasMore && !_isLoading) {
+        getMyBands();
+      }
+    }
+  }
+
   Future<void> getMyBands() async {
-    final response = await BandService.getMyBandList();
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
+    final response = await BandService.getMyBandList(_currentPage);
 
     if (response.statusCode == 200) {
-      final List decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       print("밴드 목록 불러오기 성공: $decoded");
-      if (decoded.isEmpty) {
+      final List content = decoded['content'];
+      print("밴드 목록 불러오기 성공: $decoded");
+      if (content.isEmpty) {
+        setState(() => _hasMore = false);
+        setState(() => isEmptyList = true);
+      } else {
         setState(() {
-          isEmptyList = true;
+          bands.addAll(content.cast<Map<String, dynamic>>());
+          _currentPage++;
         });
       }
-      setState(() {
-        myBands = decoded.cast<Map<String, dynamic>>();
-      });
     } else if (response.statusCode == 401) {
-      final response = await UserService.reissueToken();
-
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      final retryResponse = await UserService.reissueToken();
+      if (retryResponse.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(retryResponse.bodyBytes));
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', decoded['accessToken']);
         await prefs.setString('refreshToken', decoded['refreshToken']);
-
-        /// ✅ 토큰 재발급 성공 후 재시도
-        final retry = await BandService.getMyBandList();
-        if (retry.statusCode != 200) {
-          // TODO: 오류 시 행동
-        }
-      } else if (response.statusCode == 401) {
-        // refresh token 만료 시
+        getMyBands(); // 재시도
+      } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => AnimatedStartPage(),
-          ),
+          MaterialPageRoute(builder: (_) => AnimatedStartPage()),
         );
-        return;
-      } else {
-        // TODO: 오류 시 행동
       }
     } else {
       // TODO: 서버 오류 시 행동
       print("밴드 목록 불러오기 실패: ${jsonDecode(utf8.decode(response.bodyBytes))}");
     }
+
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -121,10 +136,11 @@ class _BandListPageState extends State<BandListPage> {
         Expanded(
           child: ListView.builder(
               // padding: const EdgeInsets.only(top: 20),
-              itemCount: myBands.length + 1,
+              controller: _scrollController,
+              itemCount: bands.length + 1,
               itemBuilder: (context, index) {
-                if (index < myBands.length) {
-                  final band = myBands[index];
+                if (index < bands.length) {
+                  final band = bands[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 30),
                     child: Align(
@@ -177,6 +193,15 @@ class _BandListPageState extends State<BandListPage> {
                       ),
                     ),
                   );
+                } else {
+                  if (_isLoading) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  } else {
+                    return const SizedBox.shrink(); // 다음 스크롤까지 대기
+                  }
                 }
               }),
         ),

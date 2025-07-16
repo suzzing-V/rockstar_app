@@ -22,7 +22,6 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
   bool isEmptyList = false;
   bool isManager = false;
   int _currentPage = 0;
-  final int _pageSize = 10;
   bool _isLoading = false;
   bool _hasMore = true;
   final ScrollController _scrollController = ScrollController();
@@ -117,7 +116,7 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const CreateBandPage(), // 밴드 생성 페이지
+                  builder: (_) => const Placeholder(), // 일정 생성 페이지
                 ),
               );
             },
