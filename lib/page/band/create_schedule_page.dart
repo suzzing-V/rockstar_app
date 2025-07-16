@@ -593,12 +593,16 @@ class _CreateSchedulePageState extends State<CreateSchedulePage> {
                         if (response.statusCode == 200) {
                           final responseBody = jsonDecode(response.body);
                           print('일정 생성 성공: ${responseBody}');
-                          Navigator.push(
+                          Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => BandPage(
-                                    bandId: widget.bandId,
-                                    bandName: widget.bandName)),
+                              builder: (context) => BandPage(
+                                bandId: widget.bandId,
+                                bandName: widget.bandName,
+                              ),
+                            ),
+                            (route) =>
+                                route.isFirst, // HomePage가 첫 번째 페이지일 경우 유지
                           );
                         } else if (response.statusCode == 400) {
                           showDialog(

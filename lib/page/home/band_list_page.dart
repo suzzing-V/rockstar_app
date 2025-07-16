@@ -135,7 +135,7 @@ class _BandListPageState extends State<BandListPage> {
         // const SizedBox(height: 0),
         Expanded(
           child: ListView.builder(
-              // padding: const EdgeInsets.only(top: 20),
+              padding: const EdgeInsets.only(bottom: 95),
               controller: _scrollController,
               itemCount: bands.length + 1,
               itemBuilder: (context, index) {

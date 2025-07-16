@@ -144,7 +144,7 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
         ),
       Expanded(
           child: ListView.builder(
-        padding: const EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(top: 20, bottom: 100),
         controller: _scrollController,
         itemCount: schedules.length + 1,
         itemBuilder: (context, index) {
