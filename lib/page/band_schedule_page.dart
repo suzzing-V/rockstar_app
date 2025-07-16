@@ -20,7 +20,7 @@ class BandSchedulePage extends StatefulWidget {
 class _BandSchedulePageState extends State<BandSchedulePage> {
   List<Map<String, dynamic>> schedules = [];
   bool isEmptyList = false;
-  bool isManager = false;
+  bool _isManager = false;
   int _currentPage = 0;
   bool _isLoading = false;
   bool _hasMore = true;
@@ -57,7 +57,9 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-      final List content = decoded['content'];
+      print("밴드 일정 불러오기: ${utf8.decode(response.bodyBytes)}");
+      final List content = decoded['scheduleList'];
+      setState(() => _isManager = decoded['isManager']);
 
       if (content.isEmpty) {
         setState(() => _hasMore = false);
@@ -92,48 +94,49 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Padding(
-        padding: EdgeInsets.only(bottom: 30, top: 20),
-        child: Align(
-          alignment: Alignment.center,
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: Size(300, 60),
-              maximumSize: Size(300, 60),
-              side: BorderSide(
-                color: Theme.of(context)
-                    .colorScheme
-                    .secondaryContainer
-                    .withOpacity(0.8),
-                width: 3,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              backgroundColor: Colors.transparent,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const Placeholder(), // 일정 생성 페이지
+      if (_isManager)
+        Padding(
+          padding: EdgeInsets.only(bottom: 10, top: 20),
+          child: Align(
+            alignment: Alignment.center,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                minimumSize: Size(300, 60),
+                maximumSize: Size(300, 60),
+                side: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondaryContainer
+                      .withOpacity(0.8),
+                  width: 3,
                 ),
-              );
-            },
-            child: Align(
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.add,
-                color: Theme.of(context).colorScheme.primaryFixed,
-                size: 40,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                backgroundColor: Colors.transparent,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const Placeholder(), // 일정 생성 페이지
+                  ),
+                );
+              },
+              child: Align(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.add,
+                  color: Theme.of(context).colorScheme.primaryFixed,
+                  size: 40,
+                ),
               ),
             ),
           ),
         ),
-      ),
       Expanded(
           child: ListView.builder(
-        // padding: const EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(top: 20),
         controller: _scrollController,
         itemCount: schedules.length + 1,
         itemBuilder: (context, index) {
@@ -172,9 +175,9 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            schedule['month'].toString().padLeft(2, '0') +
+                            schedule['startMonth'].toString().padLeft(2, '0') +
                                 '.' +
-                                schedule['day'].toString().padLeft(2, '0'),
+                                schedule['startDay'].toString().padLeft(2, '0'),
                             style: TextStyle(
                               fontFamily: 'PixelFont',
                               fontSize: 32,
@@ -190,9 +193,20 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
                           ),
                           SizedBox(width: 10),
                           Text(
-                            schedule['hour'].toString().padLeft(2, '0') +
+                            schedule['startHour'].toString().padLeft(2, '0') +
                                 ':' +
-                                schedule['minute'].toString().padLeft(2, '0'),
+                                schedule['startMinute']
+                                    .toString()
+                                    .padLeft(2, '0') +
+                                '~' +
+                                schedule['endHour'].toString().padLeft(2, '0') +
+                                ':' +
+                                schedule['endMinute']
+                                    .toString()
+                                    .padLeft(2, '0'),
+                            // '(+' +
+                            // schedule['dayDiff'].toString() +
+                            // ')',
                             style: TextStyle(
                               fontFamily: 'PixelFont',
                               fontSize: 23,

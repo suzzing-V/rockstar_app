@@ -13,8 +13,8 @@ void main() async {
   // TODO: 테스트용 자동 로그인 해제
   String? accessToken = prefs.getString('accessToken');
   String? refreshToken = prefs.getString('refreshToken');
-  // final accessToken = null;
-  // final refreshToken = null;
+  // String? accessToken = null;
+  // String? refreshToken = null;
 
   print(accessToken);
   // 앱 시작할 때마다 토큰 재발급
