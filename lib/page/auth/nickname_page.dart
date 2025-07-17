@@ -34,7 +34,15 @@ class _NicknamePageState extends State<NicknamePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ✅ 뒤로가기 버튼은 Padding 밖
-            CustomBackButton(),
+            CustomBackButton(
+              onPressed: () => Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AnimatedStartPage(),
+                ),
+                (Route<dynamic> route) => false,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(40), // 여백을 줘서 너무 붙지 않게
               child: Column(
@@ -102,11 +110,11 @@ class _NicknamePageState extends State<NicknamePage> {
                           if (response.statusCode == 200) {
                             final responseBody = jsonDecode(response.body);
                             print('닉네임 등록 성공: $responseBody');
-                            Navigator.pushReplacement(
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => HomePage(), // 홈화면
-                              ),
+                                  builder: (context) => HomePage()),
+                              (Route<dynamic> route) => false,
                             );
                           } else if (response.statusCode == 400) {
                             setState(() {
@@ -133,11 +141,12 @@ class _NicknamePageState extends State<NicknamePage> {
                               }
                             } else if (response.statusCode == 401) {
                               // refresh token 만료 시
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => AnimatedStartPage(),
                                 ),
+                                (Route<dynamic> route) => false,
                               );
                               return;
                             } else {

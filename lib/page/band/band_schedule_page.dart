@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rockstar_app/api/band_service.dart';
 import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/page/band/create_schedule_page.dart';
+import 'package:rockstar_app/page/band/edit_schedule_page%20copy.dart';
 import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -84,9 +85,12 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
         await prefs.setString('refreshToken', decoded['refreshToken']);
         getBandSchedules(); // 재시도
       } else {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => AnimatedStartPage()),
+          MaterialPageRoute(
+            builder: (context) => AnimatedStartPage(),
+          ),
+          (Route<dynamic> route) => false,
         );
       }
     } else {
@@ -143,103 +147,124 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
           ),
         ),
       Expanded(
-          child: ListView.builder(
-        padding: const EdgeInsets.only(top: 20, bottom: 100),
-        controller: _scrollController,
-        itemCount: schedules.length + 1,
-        itemBuilder: (context, index) {
-          if (index < schedules.length) {
-            final schedule = schedules[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: Align(
-                alignment: Alignment.center,
-                child: FilledButton.tonal(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .secondaryContainer
-                        .withOpacity(0.8),
-                    minimumSize: Size(350, 80), // 버튼 자체 크기
-                    maximumSize: Size(350, 80),
-                    textStyle: TextStyle(fontSize: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () async {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Placeholder(),
-                        ) // 일정 상세 페이지
-                        );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start, // ✅ 왼쪽 정렬
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            schedule['startMonth'].toString().padLeft(2, '0') +
-                                '.' +
-                                schedule['startDay'].toString().padLeft(2, '0'),
-                            style: TextStyle(
-                              fontFamily: 'PixelFont',
-                              fontSize: 32,
+          child: RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  schedules.clear();
+                  _currentPage = 0;
+                  isEmptyList = false;
+                });
+                await getBandSchedules();
+              },
+              child: ListView.builder(
+                padding: const EdgeInsets.only(top: 20, bottom: 100),
+                controller: _scrollController,
+                itemCount: schedules.length + 1,
+                itemBuilder: (context, index) {
+                  if (index < schedules.length) {
+                    final schedule = schedules[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 30),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: FilledButton.tonal(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer
+                                .withOpacity(0.8),
+                            minimumSize: Size(350, 80), // 버튼 자체 크기
+                            maximumSize: Size(350, 80),
+                            textStyle: TextStyle(fontSize: 18),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          SizedBox(width: 7),
-                          Text(
-                            schedule['dayOfWeek'],
-                            style: TextStyle(
-                              fontFamily: 'PixelFont',
-                              fontSize: 32,
-                            ),
+                          onPressed: () async {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditSchedulePage(
+                                    scheduleId: schedule['scheduleId'],
+                                  ),
+                                ) // 일정 상세 페이지
+                                );
+                          },
+                          child: Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.start, // ✅ 왼쪽 정렬
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Text(
+                                    schedule['startMonth']
+                                            .toString()
+                                            .padLeft(2, '0') +
+                                        '.' +
+                                        schedule['startDay']
+                                            .toString()
+                                            .padLeft(2, '0'),
+                                    style: TextStyle(
+                                      fontFamily: 'PixelFont',
+                                      fontSize: 32,
+                                    ),
+                                  ),
+                                  SizedBox(width: 7),
+                                  Text(
+                                    schedule['dayOfWeek'],
+                                    style: TextStyle(
+                                      fontFamily: 'PixelFont',
+                                      fontSize: 32,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    schedule['startHour']
+                                            .toString()
+                                            .padLeft(2, '0') +
+                                        ':' +
+                                        schedule['startMinute']
+                                            .toString()
+                                            .padLeft(2, '0') +
+                                        '~' +
+                                        schedule['endHour']
+                                            .toString()
+                                            .padLeft(2, '0') +
+                                        ':' +
+                                        schedule['endMinute']
+                                            .toString()
+                                            .padLeft(2, '0'),
+                                    // '(+' +
+                                    // schedule['dayDiff'].toString() +
+                                    // ')',
+                                    style: TextStyle(
+                                      fontFamily: 'PixelFont',
+                                      fontSize: 23,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
-                          SizedBox(width: 10),
-                          Text(
-                            schedule['startHour'].toString().padLeft(2, '0') +
-                                ':' +
-                                schedule['startMinute']
-                                    .toString()
-                                    .padLeft(2, '0') +
-                                '~' +
-                                schedule['endHour'].toString().padLeft(2, '0') +
-                                ':' +
-                                schedule['endMinute']
-                                    .toString()
-                                    .padLeft(2, '0'),
-                            // '(+' +
-                            // schedule['dayDiff'].toString() +
-                            // ')',
-                            style: TextStyle(
-                              fontFamily: 'PixelFont',
-                              fontSize: 23,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            );
-          } else {
-            if (_isLoading) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            } else {
-              return const SizedBox.shrink(); // 다음 스크롤까지 대기
-            }
-          }
-        },
-      )),
+                        ),
+                      ),
+                    );
+                  } else {
+                    if (_isLoading) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    } else {
+                      return const SizedBox.shrink(); // 다음 스크롤까지 대기
+                    }
+                  }
+                },
+              ))),
     ]);
   }
 }

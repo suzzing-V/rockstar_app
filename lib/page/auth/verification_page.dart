@@ -175,50 +175,50 @@ class _VerificationPageState extends State<VerificationPage> {
                               print('인증 성공: $responseBody');
                               if (nickname == null) {
                                 print('닉네임 없음');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          NicknamePage()), // 닉네임 입력
-                                );
-                              } else if (response.statusCode == 401) {
-                                final response =
-                                    await UserService.reissueToken();
-
-                                if (response.statusCode == 200) {
-                                  final decoded = jsonDecode(
-                                      utf8.decode(response.bodyBytes));
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setString(
-                                      'accessToken', decoded['accessToken']);
-                                  await prefs.setString(
-                                      'refreshToken', decoded['refreshToken']);
-
-                                  /// ✅ 토큰 재발급 성공 후 재시도
-                                  final retry = await UserService.login(
-                                      code, widget.phonenum, widget.isNew);
-                                  if (retry.statusCode != 200) {
-                                    // TODO: 오류 발생 시 행동
-                                  }
-                                } else if (response.statusCode == 401) {
-                                  // refresh token 만료 시
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AnimatedStartPage(),
-                                    ),
-                                  );
-                                  return;
-                                } else {
-                                  // TODO: 서버 오류 시 행동
-                                }
-                              } else {
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => HomePage()), // 홈
+                                      builder: (context) => NicknamePage()),
                                 );
+                              } else {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => HomePage()),
+                                  (Route<dynamic> route) => false,
+                                );
+                              }
+                            } else if (response.statusCode == 401) {
+                              final response = await UserService.reissueToken();
+
+                              if (response.statusCode == 200) {
+                                final decoded =
+                                    jsonDecode(utf8.decode(response.bodyBytes));
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                    'accessToken', decoded['accessToken']);
+                                await prefs.setString(
+                                    'refreshToken', decoded['refreshToken']);
+
+                                /// ✅ 토큰 재발급 성공 후 재시도
+                                final retry = await UserService.login(
+                                    code, widget.phonenum, widget.isNew);
+                                if (retry.statusCode != 200) {
+                                  // TODO: 오류 발생 시 행동
+                                }
+                              } else if (response.statusCode == 401) {
+                                // refresh token 만료 시
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AnimatedStartPage(),
+                                  ),
+                                  (Route<dynamic> route) => false,
+                                );
+                                return;
+                              } else {
+                                // TODO: 서버 오류 시 행동
                               }
                             } else if (statusCodeName ==
                                 'VERIFICATION_CODE_INCORRECT') {
@@ -272,11 +272,12 @@ class _VerificationPageState extends State<VerificationPage> {
                                   }
                                 } else if (response.statusCode == 401) {
                                   // refresh token 만료 시
-                                  Navigator.pushReplacement(
+                                  Navigator.pushAndRemoveUntil(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => AnimatedStartPage(),
                                     ),
+                                    (Route<dynamic> route) => false,
                                   );
                                   return;
                                 } else {

@@ -99,10 +99,11 @@ class _CreateBandPageState extends State<CreateBandPage> {
                           if (response.statusCode == 200) {
                             final responseBody = jsonDecode(response.body);
                             print('밴드 생성 성공: ${responseBody}');
-                            Navigator.pushReplacement(
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => HomePage()),
+                              (Route<dynamic> route) => false,
                             );
                           } else if (response.statusCode == 401) {
                             final response = await UserService.reissueToken();
@@ -125,11 +126,12 @@ class _CreateBandPageState extends State<CreateBandPage> {
                               }
                             } else if (response.statusCode == 401) {
                               // refresh token 만료 시
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => AnimatedStartPage(),
                                 ),
+                                (Route<dynamic> route) => false,
                               );
                               return;
                             } else {

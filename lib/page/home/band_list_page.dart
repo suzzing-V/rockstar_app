@@ -22,7 +22,6 @@ class _BandListPageState extends State<BandListPage> {
   bool isManager = false;
   int _currentPage = 0;
   bool _isLoading = false;
-  bool _hasMore = true;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -37,15 +36,6 @@ class _BandListPageState extends State<BandListPage> {
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      if (_hasMore && !_isLoading) {
-        getMyBands();
-      }
-    }
-  }
-
   Future<void> getMyBands() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
@@ -58,7 +48,6 @@ class _BandListPageState extends State<BandListPage> {
       final List content = decoded['content'];
       print("밴드 목록 불러오기 성공: $decoded");
       if (content.isEmpty) {
-        setState(() => _hasMore = false);
         setState(() => isEmptyList = true);
       } else {
         setState(() {
@@ -75,9 +64,10 @@ class _BandListPageState extends State<BandListPage> {
         await prefs.setString('refreshToken', decoded['refreshToken']);
         getMyBands(); // 재시도
       } else {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => AnimatedStartPage()),
+          (Route<dynamic> route) => false,
         );
       }
     } else {
@@ -134,76 +124,86 @@ class _BandListPageState extends State<BandListPage> {
         ),
         // const SizedBox(height: 0),
         Expanded(
-          child: ListView.builder(
-              padding: const EdgeInsets.only(bottom: 95),
-              controller: _scrollController,
-              itemCount: bands.length + 1,
-              itemBuilder: (context, index) {
-                if (index < bands.length) {
-                  final band = bands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 30),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: FilledButton.tonal(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .secondaryContainer
-                              .withOpacity(0.8),
-                          minimumSize: Size(350, 80), // 버튼 자체 크기
-                          maximumSize: Size(350, 80),
-                          textStyle: TextStyle(fontSize: 18),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () async {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BandPage(
-                                    bandId: band['bandId'],
-                                    bandName: band['bandName'])), // 밴드 상세 페이지
-                          );
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start, // ✅ 왼쪽 정렬
-                          children: [
-                            Text(
-                              band['bandName'],
-                              style: TextStyle(
-                                fontFamily: 'PixelFont',
-                                fontSize: 23,
+          child: RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  bands.clear();
+                  _currentPage = 0;
+                  isEmptyList = false;
+                });
+                await getMyBands();
+              },
+              child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 95),
+                  controller: _scrollController,
+                  itemCount: bands.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index < bands.length) {
+                      final band = bands[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: FilledButton.tonal(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer
+                                  .withOpacity(0.8),
+                              minimumSize: Size(350, 80), // 버튼 자체 크기
+                              maximumSize: Size(350, 80),
+                              textStyle: TextStyle(fontSize: 18),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            SizedBox(
-                              width: 5,
+                            onPressed: () async {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => BandPage(
+                                        bandId: band['bandId'],
+                                        bandName: band['bandName'])),
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.start, // ✅ 왼쪽 정렬
+                              children: [
+                                Text(
+                                  band['bandName'],
+                                  style: TextStyle(
+                                    fontFamily: 'PixelFont',
+                                    fontSize: 23,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                if (band['isManager'])
+                                  Icon(FontAwesomeIcons.crown,
+                                      size: 20, color: Colors.amber)
+                                // Image.asset(
+                                //   'assets/logo/crown.png',
+                                //   width: 25,
+                                //   height: 25,
+                                // ),
+                              ],
                             ),
-                            if (band['isManager'])
-                              Icon(FontAwesomeIcons.crown,
-                                  size: 20, color: Colors.amber)
-                            // Image.asset(
-                            //   'assets/logo/crown.png',
-                            //   width: 25,
-                            //   height: 25,
-                            // ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                } else {
-                  if (_isLoading) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  } else {
-                    return const SizedBox.shrink(); // 다음 스크롤까지 대기
-                  }
-                }
-              }),
+                      );
+                    } else {
+                      if (_isLoading) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      } else {
+                        return const SizedBox.shrink(); // 다음 스크롤까지 대기
+                      }
+                    }
+                  })),
         ),
       ],
     );

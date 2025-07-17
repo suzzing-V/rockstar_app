@@ -105,6 +105,7 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                           if (response.statusCode == 200) {
                             final responseBody = jsonDecode(response.body);
                             print('인증번호 전송 성공: ${responseBody}');
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -147,11 +148,12 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                               }
                             } else if (response.statusCode == 401) {
                               // refresh token 만료 시
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => AnimatedStartPage(),
                                 ),
+                                (Route<dynamic> route) => false,
                               );
                               return;
                             } else {

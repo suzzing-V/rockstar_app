@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rockstar_app/api/user_service.dart';
 import 'package:rockstar_app/button/custom_back_button.dart';
 import 'package:rockstar_app/page/band/band_schedule_page.dart';
+import 'package:rockstar_app/page/home/home_page.dart';
 import 'package:rockstar_app/page/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -69,11 +70,12 @@ class _BandPageState extends State<BandPage> {
         }
       } else if (response.statusCode == 401) {
         // refresh token 만료 시
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => AnimatedStartPage(),
           ),
+          (Route<dynamic> route) => false,
         );
         return;
       } else {
