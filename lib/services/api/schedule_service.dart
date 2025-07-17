@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:rockstar_app/api/api_call.dart';
+import 'package:rockstar_app/services/api/api_call.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleService {
@@ -87,6 +87,36 @@ class ScheduleService {
         "endMinute": endTime.minute,
         "description": memo
       }),
+    );
+  }
+
+  static Future<http.Response> deleteSchedule(int scheduleId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/schedule/$scheduleId");
+
+    return http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+  }
+
+  static Future<http.Response> getBandSchedules(int bandId, int page) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse(
+        "http://${ApiCall.host}/api/v0/schedule/band/$bandId?page=$page&size=20");
+
+    return http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
     );
   }
 }

@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/page/start_page.dart';
+import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -58,6 +58,14 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Rockstar',
         theme: ThemeData(
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: {
+              TargetPlatform.android:
+                  CupertinoPageTransitionsBuilder(), // 예: iOS 스타일
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+            },
+          ),
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 41, 15, 64)),

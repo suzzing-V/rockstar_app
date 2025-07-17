@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:rockstar_app/api/band_service.dart';
-import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/page/band/band_page.dart';
-import 'package:rockstar_app/page/band/create_band_page.dart';
-import 'package:rockstar_app/page/start_page.dart';
+import 'package:rockstar_app/services/api/band_service.dart';
+import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/views/band/band_page.dart';
+import 'package:rockstar_app/views/band/pages/create_band_page.dart';
+import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandListPage extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api/api_call.dart';
+import 'api_call.dart';
 
 class UserService {
   static Future<http.Response> updateNickname(String nickname) async {

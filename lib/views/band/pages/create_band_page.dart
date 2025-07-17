@@ -2,39 +2,34 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/button/custom_back_button.dart';
-import 'package:rockstar_app/page/auth/new_user_page.dart';
-import 'package:rockstar_app/page/auth/not_new_user_page.dart';
-import 'package:rockstar_app/page/start_page.dart';
-import 'package:rockstar_app/page/auth/verification_page.dart';
+import 'package:rockstar_app/common/button/custom_back_button.dart';
+import 'package:rockstar_app/services/api/band_service.dart';
+import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/views/home/home_page.dart';
+import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PhonenumInputPage extends StatefulWidget {
-  final bool isNew;
-
-  const PhonenumInputPage({super.key, required this.isNew});
+class CreateBandPage extends StatefulWidget {
+  const CreateBandPage({super.key});
 
   @override
-  State<PhonenumInputPage> createState() => _PhonenumInputPageState();
+  State<CreateBandPage> createState() => _CreateBandPageState();
 }
 
-class _PhonenumInputPageState extends State<PhonenumInputPage> {
+class _CreateBandPageState extends State<CreateBandPage> {
   final _controller = TextEditingController();
   bool isValid = false;
   String? errorMessage;
 
   void _onChange(String value) {
     setState(() {
-      isValid = value.length == 11;
+      isValid = value.length >= 1;
       errorMessage = null;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final isNew = widget.isNew;
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       body: SafeArea(
@@ -50,7 +45,7 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                 mainAxisAlignment: MainAxisAlignment.start, // 수직 위 정렬
                 children: [
                   Text(
-                    '전화번호를 \n입력해주세요',
+                    '밴드 이름을 \n입력해주세요',
                     style: TextStyle(
                       fontFamily: 'PixelFont',
                       color: Theme.of(context).colorScheme.secondaryContainer,
@@ -60,11 +55,10 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                   SizedBox(height: 30),
                   TextField(
                     controller: _controller,
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.text,
                     onChanged: _onChange,
                     inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(11),
+                      LengthLimitingTextInputFormatter(30),
                     ],
                     style: TextStyle(
                       fontFamily: 'PixelFont',
@@ -98,34 +92,18 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                           textStyle: TextStyle(fontSize: 18),
                         ),
                         onPressed: () async {
-                          final phonenum = _controller.text.trim();
+                          final bandName = _controller.text.trim();
                           final response =
-                              await UserService.requestCode(phonenum, isNew);
+                              await BandService.createBand(bandName);
 
                           if (response.statusCode == 200) {
                             final responseBody = jsonDecode(response.body);
-                            print('인증번호 전송 성공: ${responseBody}');
-
-                            Navigator.push(
+                            print('밴드 생성 성공: ${responseBody}');
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => VerificationPage(
-                                      isNew: widget.isNew, phonenum: phonenum)),
-                            );
-                          } else if (response.statusCode == 400) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NotNewUserPage(
-                                        phonenum: phonenum,
-                                      )), // 이미 가입한 유저
-                            );
-                          } else if (response.statusCode == 404) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      NewUserPage(phonenum: phonenum)), // 새 유저
+                                  builder: (context) => HomePage()),
+                              (Route<dynamic> route) => false,
                             );
                           } else if (response.statusCode == 401) {
                             final response = await UserService.reissueToken();
@@ -141,8 +119,8 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                                   'refreshToken', decoded['refreshToken']);
 
                               /// ✅ 토큰 재발급 성공 후 재시도
-                              final retry = await UserService.requestCode(
-                                  phonenum, isNew);
+                              final retry =
+                                  await BandService.createBand(bandName);
                               if (retry.statusCode != 200) {
                                 // TODO: 오류 발생 시 행동
                               }
@@ -160,14 +138,12 @@ class _PhonenumInputPageState extends State<PhonenumInputPage> {
                               // TODO: 서버 오류 시 행동
                             }
                           } else {
-                            setState(() {
-                              errorMessage = '인증번호를 보내지 못했습니다.';
-                            });
+                            // 오류 시 행동
 
-                            print('인증번호 전송 실패: ${response.body}');
+                            print('밴드 생성 실패: ${response.body}');
                           }
                         },
-                        child: Text('인증번호 보내기',
+                        child: Text('확인',
                             style: TextStyle(
                               fontFamily: 'PixelFont',
                             )),

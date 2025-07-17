@@ -3,11 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/button/custom_back_button.dart';
-import 'package:rockstar_app/page/band/band_schedule_page.dart';
-import 'package:rockstar_app/page/home/home_page.dart';
-import 'package:rockstar_app/page/start_page.dart';
+import 'package:rockstar_app/common/button/custom_back_button.dart';
+import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/views/band/pages/band_schedule_page.dart';
+import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandPage extends StatefulWidget {

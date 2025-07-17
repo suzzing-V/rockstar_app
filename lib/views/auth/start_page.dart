@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/page/home/home_page.dart';
-import 'package:rockstar_app/page/auth/nickname_page.dart';
-import 'package:rockstar_app/page/auth/phonenum_input_page.dart';
+import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/views/auth/nickname_page.dart';
+import 'package:rockstar_app/views/auth/phonenum_input_page.dart';
+import 'package:rockstar_app/views/home/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashRouterPage extends StatelessWidget {

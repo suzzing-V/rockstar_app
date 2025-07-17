@@ -2,22 +2,21 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/button/custom_back_button.dart';
-import 'package:rockstar_app/page/start_page.dart';
-import 'package:rockstar_app/page/auth/verification_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:rockstar_app/services/api/api_call.dart';
+import 'package:rockstar_app/common/button/custom_back_button.dart';
+import 'package:rockstar_app/views/auth/verification_page.dart';
 
-class NotNewUserPage extends StatefulWidget {
+class NewUserPage extends StatefulWidget {
   final String phonenum;
 
-  const NotNewUserPage({super.key, required this.phonenum});
+  const NewUserPage({super.key, required this.phonenum});
 
   @override
-  State<NotNewUserPage> createState() => _NotNewUserPageState();
+  State<NewUserPage> createState() => _NewUserPageState();
 }
 
-class _NotNewUserPageState extends State<NotNewUserPage> {
+class _NewUserPageState extends State<NewUserPage> {
   String? errorMessage;
 
   @override
@@ -37,7 +36,7 @@ class _NotNewUserPageState extends State<NotNewUserPage> {
                 mainAxisAlignment: MainAxisAlignment.start, // 수직 위 정렬
                 children: [
                   Text(
-                    '이미 가입한 사용자입니다.',
+                    '가입 내역이 없습니다.',
                     style: TextStyle(
                       fontFamily: 'PixelFont',
                       color: Theme.of(context).colorScheme.secondaryContainer,
@@ -68,8 +67,16 @@ class _NotNewUserPageState extends State<NotNewUserPage> {
                         textStyle: TextStyle(fontSize: 18),
                       ),
                       onPressed: () async {
-                        final response = await UserService.requestCode(
-                            widget.phonenum, false);
+                        final url = Uri.parse(
+                            "http://${ApiCall.host}/api/v0/user/verification-code");
+                        final response = await http.post(
+                          url,
+                          headers: {'Content-Type': 'application/json'},
+                          body: jsonEncode({
+                            'phoneNum': widget.phonenum,
+                            'isNew': true,
+                          }),
+                        );
 
                         if (response.statusCode == 200) {
                           final responseBody = jsonDecode(response.body);
@@ -78,39 +85,8 @@ class _NotNewUserPageState extends State<NotNewUserPage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => VerificationPage(
-                                    isNew: false, phonenum: widget.phonenum)),
+                                    isNew: true, phonenum: widget.phonenum)),
                           );
-                        } else if (response.statusCode == 401) {
-                          final response = await UserService.reissueToken();
-
-                          if (response.statusCode == 200) {
-                            final decoded =
-                                jsonDecode(utf8.decode(response.bodyBytes));
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setString(
-                                'accessToken', decoded['accessToken']);
-                            await prefs.setString(
-                                'refreshToken', decoded['refreshToken']);
-
-                            /// ✅ 토큰 재발급 성공 후 재시도
-                            final retry = await UserService.requestCode(
-                                widget.phonenum, false);
-                            if (retry.statusCode != 200) {
-                              // TODO: 오류 발생 시 행동
-                            }
-                          } else if (response.statusCode == 401) {
-                            // refresh token 만료 시
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AnimatedStartPage(),
-                              ),
-                              (Route<dynamic> route) => false,
-                            );
-                            return;
-                          } else {
-                            // TODO: 서버 오류 시 행동
-                          }
                         } else {
                           setState(() {
                             errorMessage = '인증번호를 보내지 못했습니다.';
@@ -119,7 +95,7 @@ class _NotNewUserPageState extends State<NotNewUserPage> {
                           print('인증번호 전송 실패: ${response.body}');
                         }
                       },
-                      child: Text('이 번호로 로그인',
+                      child: Text('이 번호로 가입',
                           style: TextStyle(
                             fontFamily: 'PixelFont',
                           )),

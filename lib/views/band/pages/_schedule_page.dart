@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:rockstar_app/api/schedule_service.dart';
-import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/button/custom_back_button.dart';
-import 'package:rockstar_app/page/band/band_page.dart';
-import 'package:rockstar_app/page/start_page.dart';
+import 'package:rockstar_app/common/button/custom_back_button.dart';
+import 'package:rockstar_app/services/api/schedule_service.dart';
+import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/views/band/band_page.dart';
+import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateSchedulePage extends StatefulWidget {

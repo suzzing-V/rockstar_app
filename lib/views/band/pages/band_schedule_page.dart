@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:rockstar_app/api/band_service.dart';
-import 'package:rockstar_app/api/user_service.dart';
-import 'package:rockstar_app/page/band/create_schedule_page.dart';
-import 'package:rockstar_app/page/band/edit_schedule_page%20copy.dart';
-import 'package:rockstar_app/page/start_page.dart';
+import 'package:rockstar_app/services/api/band_service.dart';
+import 'package:rockstar_app/services/api/schedule_service.dart';
+import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/views/band/pages/create_schedule_page.dart';
+import 'package:rockstar_app/views/band/pages/edit_schedule_page%20copy.dart';
+import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandSchedulePage extends StatefulWidget {
@@ -59,7 +60,7 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
     print(accessToken);
     print('refresh:$refreshToken');
     final response =
-        await BandService.getBandSchedules(widget.bandId, _currentPage);
+        await ScheduleService.getBandSchedules(widget.bandId, _currentPage);
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));

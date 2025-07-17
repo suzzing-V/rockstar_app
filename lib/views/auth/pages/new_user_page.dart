@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:rockstar_app/api/api_call.dart';
-import 'package:rockstar_app/button/custom_back_button.dart';
-import 'package:rockstar_app/page/auth/verification_page.dart';
+import 'package:rockstar_app/services/api/api_call.dart';
+import 'package:rockstar_app/common/button/custom_back_button.dart';
+import 'package:rockstar_app/views/auth/verification_page.dart';
 
 class NewUserPage extends StatefulWidget {
   final String phonenum;
