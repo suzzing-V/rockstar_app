@@ -147,7 +147,9 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ScheduleInfoPage(
-                                    scheduleId: schedule['scheduleId']),
+                                  scheduleId: schedule['scheduleId'],
+                                  bandId: widget.bandId,
+                                ),
                               ),
                             );
 

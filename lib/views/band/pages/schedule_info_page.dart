@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/appBar/default_app_bar.dart';
 import 'package:rockstar_app/common/buttons/mini_primary_button.dart';
@@ -16,8 +15,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleInfoPage extends StatefulWidget {
   final int scheduleId;
+  final int bandId;
 
-  const ScheduleInfoPage({super.key, required this.scheduleId});
+  const ScheduleInfoPage(
+      {super.key, required this.scheduleId, required this.bandId});
 
   @override
   State<ScheduleInfoPage> createState() => _ScheduleInfoPageState();
@@ -29,6 +30,7 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now();
   String memo = "";
+  bool isManager = false;
 
   @override
   void initState() {
@@ -42,7 +44,8 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
     final refreshToken = prefs.getString('refreshToken');
     print(accessToken);
     print('refresh:$refreshToken');
-    final response = await ScheduleService.getSchedule(widget.scheduleId);
+    final response =
+        await ScheduleService.getSchedule(widget.scheduleId, widget.bandId);
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -57,6 +60,7 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
         _endTime =
             TimeOfDay(hour: decoded['endHour'], minute: decoded['endMinute']);
         memo = decoded['description'];
+        isManager = decoded['isManager'];
       });
     } else if (response.statusCode == 401) {
       final retryResponse = await UserService.reissueToken();
@@ -87,6 +91,7 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
         context,
         MaterialPageRoute(
           builder: (context) => EditSchedulePage(
+            bandId: widget.bandId,
             scheduleId: widget.scheduleId,
           ),
         ),
@@ -173,33 +178,34 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
                   SizedBox(
                     height: 30,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      MiniPrimaryButton(
-                        onPressed: onPressedEdit,
-                        label: '편집',
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      MiniSecondaryButton(
-                        onPressed: () async {
-                          final shouldDelete = await showDialog<bool>(
-                            context: context,
-                            builder: (dialogContext) => ScheduleDeleteDialog(
-                              scheduleId: widget.scheduleId,
-                            ),
-                          );
-                          print("shouldDelete: $shouldDelete");
-                          if (shouldDelete == true) {
-                            Navigator.pop(context, true); // ✅ 상세 페이지 pop
-                          }
-                        },
-                        label: '삭제',
-                      ),
-                    ],
-                  ),
+                  if (isManager)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        MiniPrimaryButton(
+                          onPressed: onPressedEdit,
+                          label: '편집',
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        MiniSecondaryButton(
+                          onPressed: () async {
+                            final shouldDelete = await showDialog<bool>(
+                              context: context,
+                              builder: (dialogContext) => ScheduleDeleteDialog(
+                                scheduleId: widget.scheduleId,
+                              ),
+                            );
+                            print("shouldDelete: $shouldDelete");
+                            if (shouldDelete == true) {
+                              Navigator.pop(context, true); // ✅ 상세 페이지 pop
+                            }
+                          },
+                          label: '삭제',
+                        ),
+                      ],
+                    ),
                 ],
               ))),
     );

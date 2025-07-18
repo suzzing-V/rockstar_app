@@ -14,8 +14,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class EditSchedulePage extends StatefulWidget {
   final int scheduleId;
+  final int bandId;
 
-  const EditSchedulePage({super.key, required this.scheduleId});
+  const EditSchedulePage(
+      {super.key, required this.scheduleId, required this.bandId});
 
   @override
   State<EditSchedulePage> createState() => _EditSchedulePageState();
@@ -41,7 +43,8 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     final refreshToken = prefs.getString('refreshToken');
     print(accessToken);
     print('refresh:$refreshToken');
-    final response = await ScheduleService.getSchedule(widget.scheduleId);
+    final response =
+        await ScheduleService.getSchedule(widget.scheduleId, widget.bandId);
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -88,7 +91,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        print('일정 수정 성공: ${responseBody}');
+        print('일정 수정 성공: $responseBody');
         toScheduleInfoPage(context);
       } else if (response.statusCode == 401) {
         final response = await UserService.reissueToken();

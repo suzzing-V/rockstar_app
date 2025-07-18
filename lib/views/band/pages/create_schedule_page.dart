@@ -41,7 +41,7 @@ class _CreateSchedulePageState extends State<CreateSchedulePage> {
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        print('일정 생성 성공: ${responseBody}');
+        print('일정 생성 성공: $responseBody');
         toBandPage(context);
       } else if (response.statusCode == 400) {
         showDialog(

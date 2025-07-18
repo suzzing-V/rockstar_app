@@ -41,11 +41,12 @@ class ScheduleService {
     );
   }
 
-  static Future<http.Response> getSchedule(int scheduleId) async {
+  static Future<http.Response> getSchedule(int scheduleId, int bandId) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/schedule/$scheduleId");
+    final url =
+        Uri.parse("http://${ApiCall.host}/api/v0/schedule/$bandId/$scheduleId");
 
     return http.get(
       url,

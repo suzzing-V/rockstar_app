@@ -5,6 +5,7 @@ import 'package:rockstar_app/views/band/appbar/band_app_bar.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/band/drawer/band_drawer.dart';
 import 'package:rockstar_app/views/band/navbar/band_bottom_nav_bar.dart';
+import 'package:rockstar_app/views/band/pages/band_%08news_page.dart';
 import 'package:rockstar_app/views/band/pages/band_schedule_page.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,7 +38,10 @@ class _BandPageState extends State<BandPage> {
         bandId: widget.bandId,
         bandName: widget.bandName,
       ), // 일정
-      Placeholder(), // 소식
+      BandNewsPage(
+        bandId: widget.bandId,
+        bandName: widget.bandName,
+      ), // 소식
       Placeholder(), // 멤버
     ];
     getUserInfoInBand();

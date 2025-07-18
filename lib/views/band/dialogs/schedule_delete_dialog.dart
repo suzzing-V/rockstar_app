@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/buttons/custom_text_button.dart';
 import 'package:rockstar_app/services/api/schedule_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleDeleteDialog extends StatelessWidget {
   final int scheduleId;

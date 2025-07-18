@@ -36,10 +36,10 @@ class _CreateBandPageState extends State<CreateBandPage> {
     createBand() async {
       final bandName = _controller.text.trim();
       final response = await BandService.createBand(bandName);
-
+      print('{$jsonDecode(response.body)}');
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        print('밴드 생성 성공: ${responseBody}');
+        print('밴드 생성 성공: $responseBody');
         toHomePage(context);
       } else if (response.statusCode == 401) {
         final response = await UserService.reissueToken();
@@ -60,7 +60,7 @@ class _CreateBandPageState extends State<CreateBandPage> {
           toAnimatedStartPage(context);
           return;
         } else {
-          // TODO: 서버 오류 시 행동
+          print('{$jsonDecode(response.body)}');
         }
       } else {
         // 오류 시 행동
