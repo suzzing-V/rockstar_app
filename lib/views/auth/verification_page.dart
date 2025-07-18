@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rockstar_app/common/button/custom_back_button.dart';
+import 'package:rockstar_app/common/buttons/custom_back_button.dart';
+import 'package:rockstar_app/common/buttons/primary_button.dart';
+import 'package:rockstar_app/common/styles/app_text_styles.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/home/home_page.dart';
 import 'package:rockstar_app/views/auth/nickname_page.dart';
@@ -65,6 +67,108 @@ class _VerificationPageState extends State<VerificationPage> {
 
   @override
   Widget build(BuildContext context) {
+    requestCode() async {
+      final response =
+          await UserService.requestCode(widget.phonenum, widget.isNew);
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        _remainingSeconds = 10;
+        _startTimer();
+        print('인증번호 전송 성공: $responseBody');
+      } else if (response.statusCode == 401) {
+        final response = await UserService.reissueToken();
+
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accessToken', decoded['accessToken']);
+          await prefs.setString('refreshToken', decoded['refreshToken']);
+
+          /// ✅ 토큰 재발급 성공 후 재시도
+          final retry =
+              await UserService.requestCode(widget.phonenum, widget.isNew);
+          if (retry.statusCode != 200) {
+            // TODO: 오류 발생 시 행동
+          }
+        } else if (response.statusCode == 401) {
+          // refresh token 만료 시
+          toAnimatedStartPage(context);
+          return;
+        } else {
+          // TODO: 서버 오류 시 행동
+        }
+      } else {
+        setState(() {
+          errorMessage = '인증번호를 보내지 못했습니다.';
+        });
+
+        print('인증번호 전송 실패: ${response.body}');
+      }
+    }
+
+    login() async {
+      final code = _controller.text.trim();
+      final response =
+          await UserService.login(code, widget.phonenum, widget.isNew);
+
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes)); // ✅ UTF-8 보장
+      final statusCodeName = decoded['code'];
+      final nickname = decoded['nickname'];
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        final accessToken = responseBody['accessToken'];
+        final refreshToken = responseBody['refreshToken'];
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', accessToken);
+        await prefs.setString('refreshToken', refreshToken);
+
+        print(widget.isNew);
+        print('인증 성공: $responseBody');
+        if (nickname == null) {
+          print('닉네임 없음');
+          toNicknamePage(context);
+        } else {
+          toHomePage(context);
+        }
+      } else if (response.statusCode == 401) {
+        final response = await UserService.reissueToken();
+
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accessToken', decoded['accessToken']);
+          await prefs.setString('refreshToken', decoded['refreshToken']);
+
+          /// ✅ 토큰 재발급 성공 후 재시도
+          final retry =
+              await UserService.login(code, widget.phonenum, widget.isNew);
+          if (retry.statusCode != 200) {
+            // TODO: 오류 발생 시 행동
+          }
+        } else if (response.statusCode == 401) {
+          // refresh token 만료 시
+          toAnimatedStartPage(context);
+          return;
+        } else {
+          // TODO: 서버 오류 시 행동
+        }
+      } else if (statusCodeName == 'VERIFICATION_CODE_INCORRECT') {
+        print('인증 실패: ${response.body}');
+        setState(() {
+          errorMessage = '인증번호가 틀렸습니다.';
+        });
+      } else {
+        setState(() {
+          errorMessage = '다시 시도해주세요.';
+        });
+
+        print('인증 실패: ${response.body}');
+      }
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       body: SafeArea(
@@ -81,10 +185,8 @@ class _VerificationPageState extends State<VerificationPage> {
                 children: [
                   Text(
                     '인증번호를 \n입력해주세요',
-                    style: TextStyle(
-                      fontFamily: 'PixelFont',
+                    style: AppTextStyles.pixelFont23.copyWith(
                       color: Theme.of(context).colorScheme.secondaryContainer,
-                      fontSize: 23,
                     ),
                   ),
                   SizedBox(height: 30),
@@ -98,8 +200,7 @@ class _VerificationPageState extends State<VerificationPage> {
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly
                         ],
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
+                        style: AppTextStyles.pixelFont23.copyWith(
                           color:
                               Theme.of(context).colorScheme.secondaryContainer,
                           fontSize: 23,
@@ -114,12 +215,10 @@ class _VerificationPageState extends State<VerificationPage> {
                         padding: const EdgeInsets.only(right: 10),
                         child: Text(
                           timerText, // ex: 01:00
-                          style: TextStyle(
-                            fontFamily: 'PixelFont',
+                          style: AppTextStyles.buttonText.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
                                 .secondaryContainer,
-                            fontSize: 18,
                           ),
                         ),
                       ),
@@ -131,11 +230,7 @@ class _VerificationPageState extends State<VerificationPage> {
                     child: errorMessage != null
                         ? Text(
                             errorMessage!,
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 14,
-                              fontFamily: 'PixelFont',
-                            ),
+                            style: AppTextStyles.errorText,
                           )
                         : null, // 메시지 없을 땐 비움 (공간만 차지)
                   ),
@@ -143,154 +238,13 @@ class _VerificationPageState extends State<VerificationPage> {
                   Align(
                       alignment: Alignment.center,
                       child: Column(children: [
-                        FilledButton.tonal(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(220, 55), // 버튼 자체 크기
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 32, vertical: 16),
-                            textStyle: TextStyle(fontSize: 18),
-                          ),
-                          onPressed: () async {
-                            final code = _controller.text.trim();
-                            final response = await UserService.login(
-                                code, widget.phonenum, widget.isNew);
-
-                            final decoded = jsonDecode(
-                                utf8.decode(response.bodyBytes)); // ✅ UTF-8 보장
-                            final statusCodeName = decoded['code'];
-                            final nickname = decoded['nickname'];
-
-                            if (response.statusCode == 200) {
-                              final responseBody = jsonDecode(response.body);
-                              final accessToken = responseBody['accessToken'];
-                              final refreshToken = responseBody['refreshToken'];
-
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.setString('accessToken', accessToken);
-                              await prefs.setString(
-                                  'refreshToken', refreshToken);
-
-                              print(widget.isNew);
-                              print('인증 성공: $responseBody');
-                              if (nickname == null) {
-                                print('닉네임 없음');
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => NicknamePage()),
-                                );
-                              } else {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => HomePage()),
-                                  (Route<dynamic> route) => false,
-                                );
-                              }
-                            } else if (response.statusCode == 401) {
-                              final response = await UserService.reissueToken();
-
-                              if (response.statusCode == 200) {
-                                final decoded =
-                                    jsonDecode(utf8.decode(response.bodyBytes));
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.setString(
-                                    'accessToken', decoded['accessToken']);
-                                await prefs.setString(
-                                    'refreshToken', decoded['refreshToken']);
-
-                                /// ✅ 토큰 재발급 성공 후 재시도
-                                final retry = await UserService.login(
-                                    code, widget.phonenum, widget.isNew);
-                                if (retry.statusCode != 200) {
-                                  // TODO: 오류 발생 시 행동
-                                }
-                              } else if (response.statusCode == 401) {
-                                // refresh token 만료 시
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AnimatedStartPage(),
-                                  ),
-                                  (Route<dynamic> route) => false,
-                                );
-                                return;
-                              } else {
-                                // TODO: 서버 오류 시 행동
-                              }
-                            } else if (statusCodeName ==
-                                'VERIFICATION_CODE_INCORRECT') {
-                              print('인증 실패: ${response.body}');
-                              setState(() {
-                                errorMessage = '인증번호가 틀렸습니다.';
-                              });
-                            } else {
-                              setState(() {
-                                errorMessage = '다시 시도해주세요.';
-                              });
-
-                              print('인증 실패: ${response.body}');
-                            }
-                          },
-                          child: Text('확인',
-                              style: TextStyle(
-                                fontFamily: 'PixelFont',
-                              )),
+                        PrimaryButton(
+                          label: '확인',
+                          onPressed: login,
                         ),
                         SizedBox(height: 10),
                         InkWell(
-                            onTap: () async {
-                              final response = await UserService.requestCode(
-                                  widget.phonenum, widget.isNew);
-
-                              if (response.statusCode == 200) {
-                                final responseBody = jsonDecode(response.body);
-                                _remainingSeconds = 10;
-                                _startTimer();
-                                print('인증번호 전송 성공: $responseBody');
-                              } else if (response.statusCode == 401) {
-                                final response =
-                                    await UserService.reissueToken();
-
-                                if (response.statusCode == 200) {
-                                  final decoded = jsonDecode(
-                                      utf8.decode(response.bodyBytes));
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setString(
-                                      'accessToken', decoded['accessToken']);
-                                  await prefs.setString(
-                                      'refreshToken', decoded['refreshToken']);
-
-                                  /// ✅ 토큰 재발급 성공 후 재시도
-                                  final retry = await UserService.requestCode(
-                                      widget.phonenum, widget.isNew);
-                                  if (retry.statusCode != 200) {
-                                    // TODO: 오류 발생 시 행동
-                                  }
-                                } else if (response.statusCode == 401) {
-                                  // refresh token 만료 시
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AnimatedStartPage(),
-                                    ),
-                                    (Route<dynamic> route) => false,
-                                  );
-                                  return;
-                                } else {
-                                  // TODO: 서버 오류 시 행동
-                                }
-                              } else {
-                                setState(() {
-                                  errorMessage = '인증번호를 보내지 못했습니다.';
-                                });
-
-                                print('인증번호 전송 실패: ${response.body}');
-                              }
-                            },
+                            onTap: requestCode,
                             child: Text(
                               '인증번호 다시 보내기',
                               style: TextStyle(
@@ -309,6 +263,31 @@ class _VerificationPageState extends State<VerificationPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void toAnimatedStartPage(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnimatedStartPage(),
+      ),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  void toHomePage(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  void toNicknamePage(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => NicknamePage()),
     );
   }
 }

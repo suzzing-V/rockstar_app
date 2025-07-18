@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:rockstar_app/common/buttons/primary_button.dart';
+import 'package:rockstar_app/common/buttons/secondary_button.dart';
+import 'package:rockstar_app/common/logo/main_logo.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/nickname_page.dart';
 import 'package:rockstar_app/views/auth/phonenum_input_page.dart';
@@ -31,6 +34,30 @@ class _StartPageState extends State<StartPage> {
   void initState() {
     super.initState();
 
+    getUserInfo();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+                padding: const EdgeInsets.only(bottom: 40),
+                child: MainLogo(
+                  width: 300,
+                  height: 300,
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void getUserInfo() {
     Future.delayed(const Duration(seconds: 1), () async {
       final response = await UserService.getUserInfo();
 
@@ -41,21 +68,11 @@ class _StartPageState extends State<StartPage> {
         print('유저 조회 성공: $decoded');
 
         if (nickname == null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NicknamePage(),
-            ),
-          );
+          toNicknamePage();
           return;
         }
       } else if (response.statusCode == 404) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AnimatedStartPage(),
-          ),
-        );
+        toAnimatedStartPage();
       } else if (response.statusCode == 401) {
         final response = await UserService.reissueToken();
 
@@ -72,12 +89,7 @@ class _StartPageState extends State<StartPage> {
           }
         } else if (response.statusCode == 401) {
           // refresh token 만료 시
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AnimatedStartPage(),
-            ),
-          );
+          toAnimatedStartPage();
           return;
         } else {
           // TODO: 서버 오류 시 행동
@@ -86,34 +98,34 @@ class _StartPageState extends State<StartPage> {
         // TODO: 서버 오류 시 행동
       }
       // if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(), // 홈화면
-        ),
-      );
+      toHomePage();
       // }
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 40),
-              child: Image.asset(
-                'assets/logo/rockstar_logo.png',
-                width: 300,
-                height: 300,
-              ),
-            ),
-          ],
-        ),
+  void toHomePage() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(), // 홈화면
+      ),
+    );
+  }
+
+  void toAnimatedStartPage() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnimatedStartPage(),
+      ),
+    );
+  }
+
+  void toNicknamePage() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NicknamePage(),
       ),
     );
   }
@@ -148,63 +160,33 @@ class _AnimatedStartPageState extends State<AnimatedStartPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedPadding(
-              duration: Duration(milliseconds: 600),
-              padding: EdgeInsets.only(
-                top: _showButtons ? 0 : 100,
-                bottom: _showButtons ? 40 : 0,
-              ),
-              curve: Curves.easeOut,
-              child: Image.asset(
-                'assets/logo/rockstar_logo.png',
-                width: 270,
-                height: 270,
-              ),
-            ),
+                duration: Duration(milliseconds: 600),
+                padding: EdgeInsets.only(
+                  top: _showButtons ? 0 : 100,
+                  bottom: _showButtons ? 40 : 0,
+                ),
+                curve: Curves.easeOut,
+                child: MainLogo(
+                  width: 300,
+                  height: 300,
+                )),
             AnimatedOpacity(
               duration: Duration(milliseconds: 600),
               opacity: _showButtons ? 1.0 : 0.0,
               child: Column(
                 children: [
-                  FilledButton.tonal(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(250, 60), // 버튼 자체 크기
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      textStyle: TextStyle(fontSize: 20),
-                    ),
+                  PrimaryButton(
+                    label: '시작하기',
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                PhonenumInputPage(isNew: true)),
-                      );
+                      toPhonenumInputPage(context, true);
                     },
-                    child: Text('시작하기',
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
-                        )),
                   ),
                   SizedBox(height: 20),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: Size(250, 60), // 버튼 자체 크기
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      textStyle: TextStyle(fontSize: 20),
-                    ),
+                  SecondaryButton(
+                    label: '로그인',
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                PhonenumInputPage(isNew: false)),
-                      );
+                      toPhonenumInputPage(context, false);
                     },
-                    child: Text('로그인',
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
-                        )),
                   ),
                 ],
               ),
@@ -212,6 +194,13 @@ class _AnimatedStartPageState extends State<AnimatedStartPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void toPhonenumInputPage(BuildContext context, bool isNew) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PhonenumInputPage(isNew: isNew)),
     );
   }
 }

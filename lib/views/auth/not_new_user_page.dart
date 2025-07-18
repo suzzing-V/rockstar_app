@@ -1,10 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:rockstar_app/common/button/custom_back_button.dart';
-import 'package:rockstar_app/views/auth/start_page.dart';
+import 'package:rockstar_app/common/buttons/primary_button.dart';
+import 'package:rockstar_app/common/styles/app_text_styles.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/common/buttons/custom_back_button.dart';
+import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:rockstar_app/views/auth/verification_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,91 +47,83 @@ class _NotNewUserPageState extends State<NotNewUserPage> {
                   ),
                   SizedBox(height: 30),
                   SizedBox(
-                    height: 20, // ✅ 항상 20px 공간 확보 (텍스트 높이에 맞게 조절)
+                    height: 20,
                     child: errorMessage != null
-                        ? Text(
-                            errorMessage!,
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 14,
-                              fontFamily: 'PixelFont',
-                            ),
-                          )
-                        : null, // 메시지 없을 땐 비움 (공간만 차지)
+                        ? Text(errorMessage!, style: AppTextStyles.errorText)
+                        : null,
                   ),
                   Align(
-                    alignment: Alignment.center,
-                    child: FilledButton.tonal(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(220, 55), // 버튼 자체 크기
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                        textStyle: TextStyle(fontSize: 18),
-                      ),
-                      onPressed: () async {
-                        final response = await UserService.requestCode(
-                            widget.phonenum, false);
-
-                        if (response.statusCode == 200) {
-                          final responseBody = jsonDecode(response.body);
-                          print('인증번호 전송 성공: ${responseBody}');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => VerificationPage(
-                                    isNew: false, phonenum: widget.phonenum)),
-                          );
-                        } else if (response.statusCode == 401) {
-                          final response = await UserService.reissueToken();
+                      alignment: Alignment.center,
+                      child: PrimaryButton(
+                        label: '이 번호로 로그인',
+                        onPressed: () async {
+                          final response = await UserService.requestCode(
+                              widget.phonenum, false);
 
                           if (response.statusCode == 200) {
-                            final decoded =
-                                jsonDecode(utf8.decode(response.bodyBytes));
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setString(
-                                'accessToken', decoded['accessToken']);
-                            await prefs.setString(
-                                'refreshToken', decoded['refreshToken']);
-
-                            /// ✅ 토큰 재발급 성공 후 재시도
-                            final retry = await UserService.requestCode(
-                                widget.phonenum, false);
-                            if (retry.statusCode != 200) {
-                              // TODO: 오류 발생 시 행동
-                            }
+                            final responseBody = jsonDecode(response.body);
+                            print('인증번호 전송 성공: ${responseBody}');
+                            toVerificationPage(context);
                           } else if (response.statusCode == 401) {
-                            // refresh token 만료 시
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AnimatedStartPage(),
-                              ),
-                              (Route<dynamic> route) => false,
-                            );
-                            return;
-                          } else {
-                            // TODO: 서버 오류 시 행동
-                          }
-                        } else {
-                          setState(() {
-                            errorMessage = '인증번호를 보내지 못했습니다.';
-                          });
+                            final response = await UserService.reissueToken();
 
-                          print('인증번호 전송 실패: ${response.body}');
-                        }
-                      },
-                      child: Text('이 번호로 로그인',
-                          style: TextStyle(
-                            fontFamily: 'PixelFont',
-                          )),
-                    ),
-                  ),
+                            if (response.statusCode == 200) {
+                              final decoded =
+                                  jsonDecode(utf8.decode(response.bodyBytes));
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setString(
+                                  'accessToken', decoded['accessToken']);
+                              await prefs.setString(
+                                  'refreshToken', decoded['refreshToken']);
+
+                              /// ✅ 토큰 재발급 성공 후 재시도
+                              final retry = await UserService.requestCode(
+                                  widget.phonenum, false);
+                              if (retry.statusCode != 200) {
+                                // TODO: 오류 발생 시 행동
+                              }
+                            } else if (response.statusCode == 401) {
+                              // refresh token 만료 시
+                              toAnimatedStartPage(context);
+                              return;
+                            } else {
+                              // TODO: 서버 오류 시 행동
+                            }
+                          } else {
+                            setState(() {
+                              errorMessage = '인증번호를 보내지 못했습니다.';
+                            });
+
+                            print('인증번호 전송 실패: ${response.body}');
+                          }
+                        },
+                      )),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void toAnimatedStartPage(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnimatedStartPage(),
+      ),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  void toVerificationPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              VerificationPage(isNew: false, phonenum: widget.phonenum)),
     );
   }
 }

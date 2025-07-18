@@ -1,36 +1,28 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/appBar/default_app_bar.dart';
-import 'package:rockstar_app/common/buttons/mini_primary_button.dart';
-import 'package:rockstar_app/common/buttons/mini_secondary_button.dart';
+import 'package:rockstar_app/common/buttons/primary_button.dart';
 import 'package:rockstar_app/common/text/main_text.dart';
+import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:rockstar_app/services/api/schedule_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
-import 'package:rockstar_app/views/auth/start_page.dart';
-import 'package:rockstar_app/views/band/band_page.dart';
-import 'package:rockstar_app/views/band/container/memo_display_box.dart';
-import 'package:rockstar_app/views/band/dialogs/schedule_delete_dialog.dart';
-import 'package:rockstar_app/views/band/pages/edit_schedule_page.dart';
+import 'package:rockstar_app/views/band/button/date_picker_button.dart';
+import 'package:rockstar_app/views/band/button/time_picker_button.dart';
+import 'package:rockstar_app/views/band/container/memo_input_box.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ScheduleInfoPage extends StatefulWidget {
+class EditSchedulePage extends StatefulWidget {
   final int scheduleId;
-  final int bandId;
-  final String bandName;
 
-  const ScheduleInfoPage(
-      {super.key,
-      required this.bandId,
-      required this.bandName,
-      required this.scheduleId});
+  const EditSchedulePage({super.key, required this.scheduleId});
 
   @override
-  State<ScheduleInfoPage> createState() => _ScheduleInfoPageState();
+  State<EditSchedulePage> createState() => _EditSchedulePageState();
 }
 
-class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
+class _EditSchedulePageState extends State<EditSchedulePage> {
+  final _controller = TextEditingController();
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now();
   TimeOfDay _startTime = TimeOfDay.now();
@@ -63,7 +55,7 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
             decoded['endYear'], decoded['endMonth'], decoded['endDay']);
         _endTime =
             TimeOfDay(hour: decoded['endHour'], minute: decoded['endMinute']);
-        memo = decoded['description'];
+        _controller.text = decoded['description'];
       });
     } else if (response.statusCode == 401) {
       final retryResponse = await UserService.reissueToken();
@@ -89,24 +81,46 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    var onPressedEdit = () async {
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EditSchedulePage(
-            scheduleId: widget.scheduleId,
-          ),
-        ),
-      );
+    editSchedule() async {
+      String memo = _controller.text.trim();
+      final response = await ScheduleService.editSchedule(
+          widget.scheduleId, _startDate, _endDate, _startTime, _endTime, memo);
 
-      if (result == true) {
-        getSchedule(); // ✅ 돌아왔을 때 갱신
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        print('일정 수정 성공: ${responseBody}');
+        toScheduleInfoPage(context);
+      } else if (response.statusCode == 401) {
+        final response = await UserService.reissueToken();
+
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accessToken', decoded['accessToken']);
+          await prefs.setString('refreshToken', decoded['refreshToken']);
+
+          /// ✅ 토큰 재발급 성공 후 재시도
+          final retry = await ScheduleService.editSchedule(widget.scheduleId,
+              _startDate, _endDate, _startTime, _endTime, memo);
+          if (retry.statusCode != 200) {
+            // TODO: 오류 발생 시 행동
+          }
+        } else if (response.statusCode == 401) {
+          // refresh token 만료 시
+          toAnimatedStartPage(context);
+          return;
+        } else {
+          // TODO: 서버 오류 시 행동
+        }
+      } else {
+        // TODO: 서버 오류 시 행동
       }
-    };
+    }
+
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-      appBar: DefaultAppBar(title: ""),
+      appBar: DefaultAppBar(title: '밴드 일정 편집하기'),
       body: SafeArea(
           bottom: false,
           // ✅ 이거 추가
@@ -125,22 +139,21 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
                   ),
                   Row(
                     children: [
-                      MainText(
-                        label:
-                            '${_startDate.year}.${_startDate.month.toString().padLeft(2, '0')}.${_startDate.day.toString().padLeft(2, '0')}',
-                        fontSize: 23,
+                      DatePickerButton(
+                        initialDate: _startDate,
+                        onDatePicked: (picked) =>
+                            setState(() => _startDate = picked),
                       ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      MainText(
-                        label: _startTime.format(context),
-                        fontSize: 23,
+                      SizedBox(width: 20),
+                      TimePickerButton(
+                        initialTime: _startTime,
+                        onTimePicked: (picked) =>
+                            setState(() => _startTime = picked),
                       ),
                     ],
                   ),
                   SizedBox(
-                    height: 15,
+                    height: 10,
                   ),
                   MainText(
                     label: '끝',
@@ -151,17 +164,16 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
                   ),
                   Row(
                     children: [
-                      MainText(
-                        label:
-                            '${_endDate.year}.${_endDate.month.toString().padLeft(2, '0')}.${_endDate.day.toString().padLeft(2, '0')}',
-                        fontSize: 23,
+                      DatePickerButton(
+                        initialDate: _endDate,
+                        onDatePicked: (picked) =>
+                            setState(() => _endDate = picked),
                       ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      MainText(
-                        label: _endTime.format(context),
-                        fontSize: 23,
+                      SizedBox(width: 20),
+                      TimePickerButton(
+                        initialTime: _endTime,
+                        onTimePicked: (picked) =>
+                            setState(() => _endTime = picked),
                       ),
                     ],
                   ),
@@ -175,40 +187,16 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
                   SizedBox(
                     height: 10,
                   ),
-                  MemoDisplayBox(text: memo),
+                  MemoInputBox(controller: _controller),
                   SizedBox(
                     height: 30,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      MiniPrimaryButton(
-                        onPressed: onPressedEdit,
-                        label: '편집',
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      MiniSecondaryButton(
-                        onPressed: () async {
-                          showDialog(
-                            context: context,
-                            builder: (context) => ScheduleDeleteDialog(
-                              scheduleId: widget.scheduleId,
-                              bandId: widget.bandId,
-                              bandName: widget.bandName,
-                              startDate: _startDate,
-                              endDate: _endDate,
-                              startTime: _startTime,
-                              endTime: _endTime,
-                              memo: memo,
-                            ),
-                          );
-                        },
-                        label: '삭제',
-                      ),
-                    ],
-                  ),
+                  Align(
+                      alignment: Alignment.center,
+                      child: PrimaryButton(
+                        label: '확인',
+                        onPressed: editSchedule,
+                      )),
                 ],
               ))),
     );
@@ -224,17 +212,7 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
     );
   }
 
-  void toBandPage(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-          builder: (context) => BandPage(
-                bandId: widget.bandId,
-                bandName: widget.bandName,
-              ) // 일정 상세
-          ),
-      // (route) =>
-      //     route.isFirst, // HomePage가 첫 번째 페이지일 경우 유지
-    );
+  void toScheduleInfoPage(BuildContext context) {
+    Navigator.pop(context, true);
   }
 }

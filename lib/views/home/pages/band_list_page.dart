@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:rockstar_app/common/buttons/add_icon_button.dart';
+import 'package:rockstar_app/common/buttons/list_button.dart';
+import 'package:rockstar_app/common/icon/crown_icon.dart';
+import 'package:rockstar_app/common/text/highlight_text.dart';
 import 'package:rockstar_app/services/api/band_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/band/band_page.dart';
@@ -86,41 +89,17 @@ class _BandListPageState extends State<BandListPage> {
         Padding(
           padding: EdgeInsets.only(bottom: 30, top: 20),
           child: Align(
-            alignment: Alignment.center,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                minimumSize: Size(300, 60),
-                maximumSize: Size(300, 60),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.8),
-                  width: 3,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                backgroundColor: Colors.transparent,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const CreateBandPage(), // 밴드 생성 페이지
-                  ),
-                );
-              },
-              child: Align(
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.add,
-                  color: Theme.of(context).colorScheme.primaryFixed,
-                  size: 40,
-                ),
-              ),
-            ),
-          ),
+              alignment: Alignment.center,
+              child: AddIconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CreateBandPage(), // 밴드 생성 페이지
+                    ),
+                  );
+                },
+              )),
         ),
         // const SizedBox(height: 0),
         Expanded(
@@ -144,19 +123,7 @@ class _BandListPageState extends State<BandListPage> {
                         padding: const EdgeInsets.only(bottom: 30),
                         child: Align(
                           alignment: Alignment.center,
-                          child: FilledButton.tonal(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .secondaryContainer
-                                  .withOpacity(0.8),
-                              minimumSize: Size(350, 80), // 버튼 자체 크기
-                              maximumSize: Size(350, 80),
-                              textStyle: TextStyle(fontSize: 18),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
+                          child: ListButton(
                             onPressed: () async {
                               Navigator.push(
                                 context,
@@ -170,24 +137,14 @@ class _BandListPageState extends State<BandListPage> {
                               mainAxisAlignment:
                                   MainAxisAlignment.start, // ✅ 왼쪽 정렬
                               children: [
-                                Text(
-                                  band['bandName'],
-                                  style: TextStyle(
-                                    fontFamily: 'PixelFont',
-                                    fontSize: 23,
-                                  ),
+                                HighlightText(
+                                  label: band['bandName'],
+                                  fontSize: 23,
                                 ),
                                 SizedBox(
                                   width: 5,
                                 ),
-                                if (band['isManager'])
-                                  Icon(FontAwesomeIcons.crown,
-                                      size: 20, color: Colors.amber)
-                                // Image.asset(
-                                //   'assets/logo/crown.png',
-                                //   width: 25,
-                                //   height: 25,
-                                // ),
+                                if (band['isManager']) CrownIcon(size: 20),
                               ],
                             ),
                           ),

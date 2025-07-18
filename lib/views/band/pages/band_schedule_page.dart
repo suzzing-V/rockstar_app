@@ -1,12 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:rockstar_app/services/api/band_service.dart';
+import 'package:rockstar_app/common/buttons/add_icon_button.dart';
+import 'package:rockstar_app/common/buttons/list_button.dart';
+import 'package:rockstar_app/common/text/highlight_text.dart';
+import 'package:rockstar_app/common/text/primary_text.dart';
 import 'package:rockstar_app/services/api/schedule_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/band/pages/create_schedule_page.dart';
-import 'package:rockstar_app/views/band/pages/edit_schedule_page%20copy.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
+import 'package:rockstar_app/views/band/pages/schedule_info_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandSchedulePage extends StatefulWidget {
@@ -106,44 +109,13 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       if (_isManager)
         Padding(
-          padding: EdgeInsets.only(bottom: 10, top: 20),
+          padding: const EdgeInsets.only(bottom: 10, top: 20),
           child: Align(
             alignment: Alignment.center,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                minimumSize: Size(300, 60),
-                maximumSize: Size(300, 60),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.8),
-                  width: 3,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                backgroundColor: Colors.transparent,
-              ),
+            child: AddIconButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CreateSchedulePage(
-                      bandId: widget.bandId,
-                      bandName: widget.bandName,
-                    ), // 일정 생성 페이지
-                  ),
-                );
+                toCreateSchedulePage(context);
               },
-              child: Align(
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.add,
-                  color: Theme.of(context).colorScheme.primaryFixed,
-                  size: 40,
-                ),
-              ),
             ),
           ),
         ),
@@ -168,84 +140,31 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
                       padding: const EdgeInsets.only(bottom: 30),
                       child: Align(
                         alignment: Alignment.center,
-                        child: FilledButton.tonal(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .secondaryContainer
-                                .withOpacity(0.8),
-                            minimumSize: Size(350, 80), // 버튼 자체 크기
-                            maximumSize: Size(350, 80),
-                            textStyle: TextStyle(fontSize: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () async {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditSchedulePage(
-                                    scheduleId: schedule['scheduleId'],
-                                  ),
-                                ) // 일정 상세 페이지
-                                );
-                          },
+                        child: ListButton(
+                          onPressed: () =>
+                              toScheduleInfoPage(context, schedule),
                           child: Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.start, // ✅ 왼쪽 정렬
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.baseline,
                                 textBaseline: TextBaseline.alphabetic,
                                 children: [
-                                  Text(
-                                    schedule['startMonth']
-                                            .toString()
-                                            .padLeft(2, '0') +
-                                        '.' +
-                                        schedule['startDay']
-                                            .toString()
-                                            .padLeft(2, '0'),
-                                    style: TextStyle(
-                                      fontFamily: 'PixelFont',
-                                      fontSize: 32,
-                                    ),
+                                  HighlightText(
+                                    label:
+                                        '${schedule['startMonth'].toString().padLeft(2, '0')}.${schedule['startDay'].toString().padLeft(2, '0')}',
+                                    fontSize: 32,
                                   ),
                                   SizedBox(width: 7),
-                                  Text(
-                                    schedule['dayOfWeek'],
-                                    style: TextStyle(
-                                      fontFamily: 'PixelFont',
-                                      fontSize: 32,
-                                    ),
+                                  HighlightText(
+                                    label: schedule['dayOfWeek'],
+                                    fontSize: 32,
                                   ),
                                   SizedBox(width: 10),
-                                  Text(
-                                    schedule['startHour']
-                                            .toString()
-                                            .padLeft(2, '0') +
-                                        ':' +
-                                        schedule['startMinute']
-                                            .toString()
-                                            .padLeft(2, '0') +
-                                        '~' +
-                                        schedule['endHour']
-                                            .toString()
-                                            .padLeft(2, '0') +
-                                        ':' +
-                                        schedule['endMinute']
-                                            .toString()
-                                            .padLeft(2, '0'),
-                                    // '(+' +
-                                    // schedule['dayDiff'].toString() +
-                                    // ')',
-                                    style: TextStyle(
-                                      fontFamily: 'PixelFont',
-                                      fontSize: 23,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
+                                  PrimaryText(
+                                    label:
+                                        '${schedule['startHour'].toString().padLeft(2, '0')}:${schedule['startMinute'].toString().padLeft(2, '0')}~${schedule['endHour'].toString().padLeft(2, '0')}:${schedule['endMinute'].toString().padLeft(2, '0')}',
+                                    fontSize: 23,
                                   ),
                                 ],
                               )
@@ -267,5 +186,30 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
                 },
               ))),
     ]);
+  }
+
+  void toScheduleInfoPage(BuildContext context, Map<String, dynamic> schedule) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ScheduleInfoPage(
+            bandId: widget.bandId,
+            bandName: widget.bandName,
+            scheduleId: schedule['scheduleId'],
+          ),
+        ) // 일정 상세 페이지
+        );
+  }
+
+  void toCreateSchedulePage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CreateSchedulePage(
+          bandId: widget.bandId,
+          bandName: widget.bandName,
+        ),
+      ),
+    );
   }
 }
