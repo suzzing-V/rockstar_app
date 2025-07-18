@@ -9,7 +9,6 @@ import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/services/api/schedule_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
-import 'package:rockstar_app/views/band/band_page.dart';
 import 'package:rockstar_app/views/band/container/memo_display_box.dart';
 import 'package:rockstar_app/views/band/dialogs/schedule_delete_dialog.dart';
 import 'package:rockstar_app/views/band/pages/edit_schedule_page.dart';
@@ -17,14 +16,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleInfoPage extends StatefulWidget {
   final int scheduleId;
-  final int bandId;
-  final String bandName;
 
-  const ScheduleInfoPage(
-      {super.key,
-      required this.bandId,
-      required this.bandName,
-      required this.scheduleId});
+  const ScheduleInfoPage({super.key, required this.scheduleId});
 
   @override
   State<ScheduleInfoPage> createState() => _ScheduleInfoPageState();
@@ -89,7 +82,7 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    var onPressedEdit = () async {
+    onPressedEdit() async {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -102,7 +95,8 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
       if (result == true) {
         getSchedule(); // ✅ 돌아왔을 때 갱신
       }
-    };
+    }
+
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -191,19 +185,16 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
                       ),
                       MiniSecondaryButton(
                         onPressed: () async {
-                          showDialog(
+                          final shouldDelete = await showDialog<bool>(
                             context: context,
-                            builder: (context) => ScheduleDeleteDialog(
+                            builder: (dialogContext) => ScheduleDeleteDialog(
                               scheduleId: widget.scheduleId,
-                              bandId: widget.bandId,
-                              bandName: widget.bandName,
-                              startDate: _startDate,
-                              endDate: _endDate,
-                              startTime: _startTime,
-                              endTime: _endTime,
-                              memo: memo,
                             ),
                           );
+                          print("shouldDelete: $shouldDelete");
+                          if (shouldDelete == true) {
+                            Navigator.pop(context, true); // ✅ 상세 페이지 pop
+                          }
                         },
                         label: '삭제',
                       ),
@@ -225,16 +216,6 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
   }
 
   void toBandPage(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-          builder: (context) => BandPage(
-                bandId: widget.bandId,
-                bandName: widget.bandName,
-              ) // 일정 상세
-          ),
-      // (route) =>
-      //     route.isFirst, // HomePage가 첫 번째 페이지일 경우 유지
-    );
+    Navigator.pop(context, true);
   }
 }

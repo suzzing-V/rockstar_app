@@ -5,29 +5,14 @@ import 'package:rockstar_app/common/buttons/custom_text_button.dart';
 import 'package:rockstar_app/services/api/schedule_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
-import 'package:rockstar_app/views/band/band_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleDeleteDialog extends StatelessWidget {
   final int scheduleId;
-  final int bandId;
-  final String bandName;
-  final DateTime startDate;
-  final DateTime endDate;
-  final TimeOfDay startTime;
-  final TimeOfDay endTime;
-  final String memo;
 
   const ScheduleDeleteDialog({
     super.key,
     required this.scheduleId,
-    required this.bandId,
-    required this.bandName,
-    required this.startDate,
-    required this.endDate,
-    required this.startTime,
-    required this.endTime,
-    required this.memo,
   });
 
   @override
@@ -56,46 +41,15 @@ class ScheduleDeleteDialog extends StatelessWidget {
                 final response =
                     await ScheduleService.deleteSchedule(scheduleId);
 
-                if (response.statusCode == 200) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BandPage(
-                        bandId: bandId,
-                        bandName: bandName,
-                      ),
-                    ),
-                  );
+                if (response.statusCode == 204 || response.statusCode == 404) {
+                  Navigator.of(context).pop(true); // ← 여기에서 true 반환
                 } else if (response.statusCode == 401) {
                   final reissue = await UserService.reissueToken();
                   if (reissue.statusCode == 200) {
-                    final decoded = jsonDecode(utf8.decode(reissue.bodyBytes));
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString(
-                        'accessToken', decoded['accessToken']);
-                    await prefs.setString(
-                        'refreshToken', decoded['refreshToken']);
-
-                    // retry delete
-                    final retry = await ScheduleService.editSchedule(
-                      scheduleId,
-                      startDate,
-                      endDate,
-                      startTime,
-                      endTime,
-                      memo,
-                    );
-
-                    if (retry.statusCode == 200) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BandPage(
-                            bandId: bandId,
-                            bandName: bandName,
-                          ),
-                        ),
-                      );
+                    final retry =
+                        await ScheduleService.deleteSchedule(scheduleId);
+                    if (retry.statusCode == 200 || retry.statusCode == 404) {
+                      Navigator.of(context).pop(true);
                     }
                   } else {
                     Navigator.pushAndRemoveUntil(
@@ -109,7 +63,7 @@ class ScheduleDeleteDialog extends StatelessWidget {
             ),
             CustomTextButton(
               label: '취소',
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(context).pop(false),
             ),
           ],
         ),

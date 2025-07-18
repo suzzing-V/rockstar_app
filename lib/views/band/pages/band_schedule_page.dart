@@ -141,8 +141,24 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
                       child: Align(
                         alignment: Alignment.center,
                         child: ListButton(
-                          onPressed: () =>
-                              toScheduleInfoPage(context, schedule),
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ScheduleInfoPage(
+                                    scheduleId: schedule['scheduleId']),
+                              ),
+                            );
+
+                            if (result == true) {
+                              setState(() {
+                                schedules.clear();
+                                _currentPage = 0;
+                                _hasMore = true;
+                              });
+                              await getBandSchedules(); // ✅ 삭제 후 목록 갱신
+                            }
+                          },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -186,19 +202,6 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
                 },
               ))),
     ]);
-  }
-
-  void toScheduleInfoPage(BuildContext context, Map<String, dynamic> schedule) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ScheduleInfoPage(
-            bandId: widget.bandId,
-            bandName: widget.bandName,
-            scheduleId: schedule['scheduleId'],
-          ),
-        ) // 일정 상세 페이지
-        );
   }
 
   void toCreateSchedulePage(BuildContext context) {
