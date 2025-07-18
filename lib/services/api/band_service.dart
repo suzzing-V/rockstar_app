@@ -10,7 +10,7 @@ class BandService {
     final accessToken = prefs.getString('accessToken');
 
     final url =
-        Uri.parse("http://${ApiCall.host}/api/v0/band/user?page=$page&size=20");
+        Uri.parse("http://${ApiCall.host}/api/v0/band/user?page=$page&size=10");
 
     return http.get(
       url,

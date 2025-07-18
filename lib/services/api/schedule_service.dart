@@ -111,7 +111,7 @@ class ScheduleService {
     final accessToken = prefs.getString('accessToken');
 
     final url = Uri.parse(
-        "http://${ApiCall.host}/api/v0/schedule/band/$bandId?page=$page&size=20");
+        "http://${ApiCall.host}/api/v0/schedule/band/$bandId?page=$page&size=10");
 
     return http.get(
       url,

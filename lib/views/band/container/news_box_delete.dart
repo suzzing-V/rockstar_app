@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/text/highlight_text.dart';
-import 'package:rockstar_app/common/text/main_text.dart';
 
 class NewsBoxDelete extends StatelessWidget {
   final String text1;

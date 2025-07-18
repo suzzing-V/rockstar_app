@@ -25,11 +25,14 @@ class _BandListPageState extends State<BandListPage> {
   bool isManager = false;
   int _currentPage = 0;
   bool _isLoading = false;
+  bool _hasMore = true;
+
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     getMyBands();
   }
 
@@ -37,6 +40,16 @@ class _BandListPageState extends State<BandListPage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    final position = _scrollController.position;
+
+    if (position.pixels >= position.maxScrollExtent - 50) {
+      if (_hasMore && !_isLoading) {
+        getMyBands();
+      }
+    }
   }
 
   Future<void> getMyBands() async {
@@ -47,15 +60,20 @@ class _BandListPageState extends State<BandListPage> {
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-      print("밴드 목록 불러오기 성공: $decoded");
       final List content = decoded['content'];
-      print("밴드 목록 불러오기 성공: $decoded");
-      if (content.isEmpty) {
-        setState(() => isEmptyList = true);
-      } else {
+
+      print("밴드 멤버 불러오기: ${utf8.decode(response.bodyBytes)}");
+
+      if (content.isNotEmpty) {
         setState(() {
           bands.addAll(content.cast<Map<String, dynamic>>());
           _currentPage++;
+          _hasMore = !(decoded['last'] ?? true);
+        });
+      } else {
+        setState(() {
+          _hasMore = false;
+          isEmptyList = true;
         });
       }
     } else if (response.statusCode == 401) {

@@ -113,7 +113,7 @@ class _BandNewsPageState extends State<BandNewsPage> {
                 await getBandNews();
               },
               child: ListView.builder(
-                padding: const EdgeInsets.only(top: 20, bottom: 100),
+                padding: const EdgeInsets.only(top: 20, bottom: 110),
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: news.length + 1,
