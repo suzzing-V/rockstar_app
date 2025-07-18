@@ -132,6 +132,7 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
               child: ListView.builder(
                 padding: const EdgeInsets.only(top: 20, bottom: 100),
                 controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: schedules.length + 1,
                 itemBuilder: (context, index) {
                   if (index < schedules.length) {

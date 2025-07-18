@@ -115,6 +115,7 @@ class _BandListPageState extends State<BandListPage> {
               child: ListView.builder(
                   padding: const EdgeInsets.only(bottom: 95),
                   controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
                   itemCount: bands.length + 1,
                   itemBuilder: (context, index) {
                     if (index < bands.length) {
