@@ -37,4 +37,18 @@ class BandService {
       }),
     );
   }
+
+  static Future getBandUrl(int bandId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/url/$bandId");
+
+    return http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+  }
 }

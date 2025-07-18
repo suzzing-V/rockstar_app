@@ -1,14 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:rockstar_app/common/buttons/add_icon_button.dart';
 import 'package:rockstar_app/common/icon/crown_icon.dart';
 import 'package:rockstar_app/common/listtile/drawer_list_tile.dart';
 import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/common/text/primary_text.dart';
+import 'package:rockstar_app/services/api/band_service.dart';
 import 'package:rockstar_app/services/api/news_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/band/container/news_box.dart';
 import 'package:rockstar_app/views/band/container/news_box_delete.dart';
+import 'package:rockstar_app/views/band/dialogs/band_url_dialog.dart';
 import 'package:rockstar_app/views/band/pages/create_schedule_page.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:rockstar_app/views/band/pages/schedule_info_page.dart';
@@ -31,6 +35,7 @@ class _BandMemberPageState extends State<BandMemberPage> {
   int _currentPage = 0;
   bool _isLoading = false;
   bool _hasMore = true;
+  String bandUrl = "";
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -108,6 +113,21 @@ class _BandMemberPageState extends State<BandMemberPage> {
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Padding(
+        padding: const EdgeInsets.only(bottom: 10, top: 20),
+        child: Align(
+          alignment: Alignment.center,
+          child: AddIconButton(
+            onPressed: () async {
+              await getBandUrl(context);
+
+              showDialog(
+                  context: context,
+                  builder: (context) => BandUrlDialog(bandUrl: bandUrl));
+            },
+          ),
+        ),
+      ),
       Expanded(
           child: RefreshIndicator(
         onRefresh: () async {
@@ -160,6 +180,38 @@ class _BandMemberPageState extends State<BandMemberPage> {
         ),
       )),
     ]);
+  }
+
+  Future<void> getBandUrl(BuildContext context) async {
+    final response = await BandService.getBandUrl(widget.bandId);
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+
+      print("밴드 멤버 불러오기: ${utf8.decode(response.bodyBytes)}");
+
+      setState(() {
+        bandUrl = decoded['url'];
+      });
+    } else if (response.statusCode == 401) {
+      final retryResponse = await UserService.reissueToken();
+      if (retryResponse.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(retryResponse.bodyBytes));
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', decoded['accessToken']);
+        await prefs.setString('refreshToken', decoded['refreshToken']);
+        getBandUrl(context); // 재시도
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => AnimatedStartPage()),
+          (Route<dynamic> route) => false,
+        );
+      }
+    } else {
+      // TODO: 서버 오류 시 행동
+      print("밴드 목록 불러오기 실패: ${jsonDecode(utf8.decode(response.bodyBytes))}");
+    }
   }
 
   void toCreateSchedulePage(BuildContext context) {
