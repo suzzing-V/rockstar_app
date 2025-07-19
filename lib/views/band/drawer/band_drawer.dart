@@ -9,7 +9,7 @@ class BandDrawer extends StatelessWidget {
   final bool isManager;
   final int bandId;
   final String bandName;
-  final void Function(String newBandName) onBandNameChanged;
+  final void Function(String? newBandName) onBandNameChanged;
 
   const BandDrawer({
     super.key,
@@ -55,7 +55,7 @@ class BandDrawer extends StatelessWidget {
               label: '밴드 이름 수정하기',
               icon: const Icon(Icons.edit),
               onTap: () async {
-                final String newBandName = await Navigator.push(
+                String? newBandName = await Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
