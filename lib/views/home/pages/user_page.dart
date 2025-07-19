@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
+import 'package:rockstar_app/views/auth/nickname_page.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
-import 'package:rockstar_app/views/home/dialogs/logout_dialog.dart';
+import 'package:rockstar_app/views/home/dialogs/one_title_two_button_dialog.dart';
+import 'package:rockstar_app/views/home/pages/nickname_update_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPage extends StatefulWidget {
@@ -87,7 +89,7 @@ class _UserPageState extends State<UserPage> {
               final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => Placeholder() // 닉네임 수정 페이지
+                    builder: (context) => NicknameUpdatePage() // 닉네임 수정 페이지
                     ),
               );
 
