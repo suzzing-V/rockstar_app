@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
-import 'package:rockstar_app/views/auth/nickname_page.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:rockstar_app/views/home/dialogs/one_title_two_button_dialog.dart';
 import 'package:rockstar_app/views/home/pages/nickname_update_page.dart';

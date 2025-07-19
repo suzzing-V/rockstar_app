@@ -29,16 +29,16 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 5),
+          padding: const EdgeInsets.only(right: 10, bottom: 6),
           child: IconButton(
-            icon: const Icon(Icons.add_rounded),
-            color: Theme.of(context).colorScheme.primaryFixed,
-            iconSize: 40,
+            icon: const Icon(Icons.notifications_none),
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            iconSize: 30,
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const CreateBandPage(),
+                  builder: (context) => const Placeholder(), // 알림 페이지
                 ),
               );
             },

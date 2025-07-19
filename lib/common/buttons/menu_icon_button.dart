@@ -6,7 +6,7 @@ class MenuIconButton extends StatelessWidget {
 
   const MenuIconButton({
     super.key,
-    this.iconSize = 35,
+    this.iconSize = 30,
     this.color,
   });
 

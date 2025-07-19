@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rockstar_app/common/buttons/custom_back_button.dart';
+import 'package:rockstar_app/common/appBar/default_app_bar.dart';
 import 'package:rockstar_app/common/buttons/primary_button.dart';
 import 'package:rockstar_app/common/styles/app_text_styles.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
@@ -31,20 +31,14 @@ class _NicknamePageState extends State<NicknamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+      appBar: DefaultAppBar(
+        title: "",
+        onBack: () => toAnimatedStartPage(context),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ 뒤로가기 버튼은 Padding 밖
-            CustomBackButton(
-              onPressed: () => Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AnimatedStartPage(),
-                ),
-                (Route<dynamic> route) => false,
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.all(40), // 여백을 줘서 너무 붙지 않게
               child: Column(

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:rockstar_app/common/appBar/default_app_bar.dart';
 import 'package:rockstar_app/common/buttons/primary_button.dart';
 import 'package:rockstar_app/common/styles/app_text_styles.dart';
 import 'package:rockstar_app/common/buttons/custom_back_button.dart';
@@ -23,12 +24,12 @@ class _NewUserPageState extends State<NewUserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+      appBar: DefaultAppBar(title: ""),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ✅ 뒤로가기 버튼은 Padding 밖
-            CustomBackButton(),
             Padding(
               padding: const EdgeInsets.all(40), // 여백을 줘서 너무 붙지 않게
               child: Column(
