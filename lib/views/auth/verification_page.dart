@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rockstar_app/common/appBar/default_app_bar.dart';
-import 'package:rockstar_app/common/buttons/custom_back_button.dart';
 import 'package:rockstar_app/common/buttons/primary_button.dart';
 import 'package:rockstar_app/common/styles/app_text_styles.dart';
 import 'package:rockstar_app/services/api/user_service.dart';

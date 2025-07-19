@@ -14,8 +14,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class BandSchedulePage extends StatefulWidget {
   final int bandId;
+  final bool isManager;
 
-  const BandSchedulePage({super.key, required this.bandId});
+  const BandSchedulePage(
+      {super.key, required this.bandId, required this.isManager});
 
   @override
   State<BandSchedulePage> createState() => _BandSchedulePageState();
@@ -24,7 +26,6 @@ class BandSchedulePage extends StatefulWidget {
 class _BandSchedulePageState extends State<BandSchedulePage> {
   List<Map<String, dynamic>> schedules = [];
   bool isEmptyList = false;
-  bool _isManager = false;
   int _currentPage = 0;
   bool _isLoading = false;
   bool _hasMore = true;
@@ -67,7 +68,6 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       print("밴드 일정 불러오기: ${utf8.decode(response.bodyBytes)}");
       final List content = decoded['scheduleList'];
-      setState(() => _isManager = decoded['isManager']);
 
       if (content.isEmpty) {
         setState(() => _hasMore = false);
@@ -105,7 +105,7 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      if (_isManager)
+      if (widget.isManager)
         Padding(
           padding: const EdgeInsets.only(bottom: 10, top: 20),
           child: Align(

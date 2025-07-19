@@ -15,7 +15,7 @@ class HighlightText extends StatelessWidget {
       style: TextStyle(
         fontFamily: 'PixelFont',
         fontSize: fontSize,
-        color: Theme.of(context).colorScheme.onPrimaryContainer,
+        color: color ?? Theme.of(context).colorScheme.onPrimaryContainer,
       ),
     );
   }

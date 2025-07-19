@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/text/highlight_text.dart';
 
-class DrawerListTile extends StatelessWidget {
+class WarningDrawerListTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
-  const DrawerListTile(
+  const WarningDrawerListTile(
       {super.key, required this.icon, required this.onTap, this.label = ""});
 
   @override
@@ -14,9 +14,10 @@ class DrawerListTile extends StatelessWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: Theme.of(context).colorScheme.onPrimaryContainer,
+        color: Colors.red,
       ),
       title: HighlightText(
+        color: Colors.red,
         label: label,
         fontSize: 18,
       ),

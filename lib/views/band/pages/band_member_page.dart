@@ -12,8 +12,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class BandMemberPage extends StatefulWidget {
   final int bandId;
+  final bool isManager;
 
-  const BandMemberPage({super.key, required this.bandId});
+  const BandMemberPage(
+      {super.key, required this.bandId, required this.isManager});
 
   @override
   State<BandMemberPage> createState() => _BandMemberPageState();

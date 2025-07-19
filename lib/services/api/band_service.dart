@@ -99,4 +99,37 @@ class BandService {
       },
     );
   }
+
+  static Future deleteBand(int bandId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/$bandId");
+
+    return http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+  }
+
+  static Future delegateManager(int bandId, int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/manager");
+
+    return http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode({
+        'bandId': bandId,
+        'newManagerId': userId,
+      }),
+    );
+  }
 }

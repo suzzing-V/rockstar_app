@@ -32,20 +32,26 @@ class _BandPageState extends State<BandPage> {
 
   int _selectedIndex = 0;
 
-  List<Widget> _pages = [];
+  List<Widget> get pages => [
+        BandSchedulePage(bandId: widget.bandId, isManager: managerId == userId),
+        BandNewsPage(
+          bandId: widget.bandId,
+        ),
+        BandMemberPage(bandId: widget.bandId, isManager: managerId == userId),
+      ];
 
   @override
   void initState() {
     super.initState();
-    _pages = [
-      BandSchedulePage(
-        bandId: widget.bandId,
-      ), // 일정
-      BandNewsPage(
-        bandId: widget.bandId,
-      ), // 소식
-      BandMemberPage(bandId: widget.bandId), // 멤버
-    ];
+    // _pages = [
+    //   BandSchedulePage(
+    //     bandId: widget.bandId,
+    //   ), // 일정
+    //   BandNewsPage(
+    //     bandId: widget.bandId,
+    //   ), // 소식
+    //   BandMemberPage(bandId: widget.bandId), // 멤버
+    // ];
     getUserInfoInBand();
     getBandInfo();
   }
@@ -152,13 +158,19 @@ class _BandPageState extends State<BandPage> {
             }); // 닉네임, isManager 등 갱신
           }
         },
+        onManagerChanged: (isChanged) {
+          if (isChanged) {
+            getUserInfoInBand();
+            getBandInfo(); // 닉네임, isManager 등 갱신
+          }
+        },
       ),
       body: SafeArea(
         bottom: false,
         // ✅ 이거 추가
         child: IndexedStack(
           index: _selectedIndex,
-          children: _pages,
+          children: pages,
         ),
       ),
       bottomNavigationBar: BandBottomNavBar(

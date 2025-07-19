@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rockstar_app/views/band/pages/create_band_page.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppBar({super.key});
