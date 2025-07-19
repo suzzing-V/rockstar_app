@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rockstar_app/views/home/appbar/home_app_bar.dart';
 import 'package:rockstar_app/views/home/navbar/home_bottom_nav_bar.dart';
 import 'package:rockstar_app/views/home/pages/band_list_page.dart';
+import 'package:rockstar_app/views/home/pages/user_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,7 +19,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     BandListPage(), // 홈
-    Placeholder(), // 내 정보
+    UserPage(), // 내 정보
   ];
 
   @override

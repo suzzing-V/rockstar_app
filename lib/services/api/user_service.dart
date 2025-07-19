@@ -104,4 +104,36 @@ class UserService {
     );
     return response;
   }
+
+  static Future<http.Response> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final refreshToken = prefs.getString('refreshToken');
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/user/logout");
+    return http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization-refresh': 'Bearer $refreshToken',
+        'Authorization': 'Bearer $accessToken'
+      },
+    );
+  }
+
+  static Future<http.Response> withdraw() async {
+    final prefs = await SharedPreferences.getInstance();
+    final refreshToken = prefs.getString('refreshToken');
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/user");
+    return http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization-refresh': 'Bearer $refreshToken',
+        'Authorization': 'Bearer $accessToken'
+      },
+    );
+  }
 }
