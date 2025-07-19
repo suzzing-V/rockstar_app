@@ -6,12 +6,11 @@ import 'package:rockstar_app/common/buttons/primary_button.dart';
 import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/services/api/schedule_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
-import 'package:rockstar_app/views/band/band_page.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:rockstar_app/views/band/button/date_picker_button.dart';
 import 'package:rockstar_app/views/band/button/time_picker_button.dart';
 import 'package:rockstar_app/views/band/container/memo_input_box.dart';
-import 'package:rockstar_app/views/band/dialogs/custom_alert_dialog.dart';
+import 'package:rockstar_app/common/dialog/one_button_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateSchedulePage extends StatefulWidget {
@@ -44,8 +43,8 @@ class _CreateSchedulePageState extends State<CreateSchedulePage> {
       } else if (response.statusCode == 400) {
         showDialog(
           context: context,
-          builder: (context) => StartAfterEndAlertDialog(
-            message: '시작 날짜는 끝 날짜보다\n늦을 수 없습니다.',
+          builder: (context) => OneButtonDialog(
+            title: '시작 날짜는 끝 날짜보다\n늦을 수 없습니다.',
             onConfirm: () => Navigator.of(context).pop(),
           ),
         );

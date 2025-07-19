@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/buttons/custom_text_button.dart';
 import 'package:rockstar_app/common/text/highlight_text.dart';
+import 'package:rockstar_app/common/text/primary_text.dart';
 
-class StartAfterEndAlertDialog extends StatelessWidget {
-  final String message;
+class OneButtonDialog extends StatelessWidget {
+  final String title;
   final String buttonText;
   final VoidCallback onConfirm;
+  final String content;
 
-  const StartAfterEndAlertDialog({
-    super.key,
-    required this.message,
-    required this.onConfirm,
-    this.buttonText = '확인',
-  });
+  const OneButtonDialog(
+      {super.key,
+      required this.title,
+      required this.onConfirm,
+      this.buttonText = '확인',
+      this.content = ""});
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +24,12 @@ class StartAfterEndAlertDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       title: HighlightText(
-        label: message,
+        label: title,
         fontSize: 18,
+      ),
+      content: PrimaryText(
+        label: content,
+        fontSize: 14,
       ),
       actions: [
         CustomTextButton(

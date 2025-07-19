@@ -85,4 +85,18 @@ class BandService {
       },
     );
   }
+
+  static Future withdrawBand(int bandId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/user/$bandId");
+
+    return http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+  }
 }
