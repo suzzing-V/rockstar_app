@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/appBar/default_app_bar.dart';
 import 'package:rockstar_app/common/buttons/primary_button.dart';
+import 'package:rockstar_app/common/dialog/one_button_dialog.dart';
 import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:rockstar_app/services/api/schedule_service.dart';
@@ -93,6 +94,14 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
         final responseBody = jsonDecode(response.body);
         print('일정 수정 성공: $responseBody');
         toScheduleInfoPage(context);
+      } else if (response.statusCode == 400) {
+        showDialog(
+          context: context,
+          builder: (context) => OneButtonDialog(
+            title: '시작 날짜는 끝 날짜보다\n늦을 수 없습니다.',
+            onConfirm: () => Navigator.of(context).pop(),
+          ),
+        );
       } else if (response.statusCode == 401) {
         final response = await UserService.reissueToken();
 

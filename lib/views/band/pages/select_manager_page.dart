@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/appBar/default_app_bar.dart';
+import 'package:rockstar_app/common/dialog/one_button_dialog.dart';
 import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/services/api/band_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
@@ -146,9 +147,59 @@ class _SelectManagerPageState extends State<SelectManagerPage> {
                                     final response =
                                         await BandService.delegateManager(
                                             widget.bandId, user['userId']);
+                                    print('{$jsonDecode(response.body)}');
                                     if (response.statusCode == 200) {
                                       Navigator.pop(context);
                                       Navigator.pop(context, true);
+                                    } else if (response.statusCode == 404) {
+                                      Navigator.pop(context);
+                                      await showDialog(
+                                        context: context,
+                                        builder: (context) => OneButtonDialog(
+                                          title: '밴드 멤버가 아닙니다.',
+                                          onConfirm: () =>
+                                              Navigator.of(context).pop(),
+                                        ),
+                                      );
+                                    } else if (response.statusCode == 401) {
+                                      final response =
+                                          await UserService.reissueToken();
+
+                                      if (response.statusCode == 200) {
+                                        final decoded = jsonDecode(
+                                            utf8.decode(response.bodyBytes));
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        await prefs.setString('accessToken',
+                                            decoded['accessToken']);
+                                        await prefs.setString('refreshToken',
+                                            decoded['refreshToken']);
+
+                                        /// ✅ 토큰 재발급 성공 후 재시도
+                                        final retry =
+                                            await BandService.delegateManager(
+                                                widget.bandId, user['userId']);
+                                        if (retry.statusCode != 200) {
+                                          // TODO: 오류 발생 시 행동
+                                        }
+                                      } else if (response.statusCode == 401) {
+                                        // refresh token 만료 시
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                AnimatedStartPage(),
+                                          ),
+                                          (Route<dynamic> route) => false,
+                                        );
+                                        return;
+                                      } else {
+                                        print('{$jsonDecode(response.body)}');
+                                      }
+                                    } else {
+                                      // 오류 시 행동
+
+                                      print('밴드 이름 수정 실패: ${response.body}');
                                     }
                                   },
                                 ),
