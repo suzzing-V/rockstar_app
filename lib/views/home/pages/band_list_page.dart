@@ -148,8 +148,8 @@ class _BandListPageState extends State<BandListPage> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => BandPage(
-                                        bandId: band['bandId'],
-                                        bandName: band['bandName'])),
+                                          bandId: band['bandId'],
+                                        )),
                               );
                             },
                             child: Row(

@@ -91,20 +91,6 @@ class UserService {
     return response;
   }
 
-  static Future<http.Response> getUserInfoInBand(int bandId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accessToken');
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/user/band/$bandId");
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken'
-      },
-    );
-    return response;
-  }
-
   static Future<http.Response> logout() async {
     final prefs = await SharedPreferences.getInstance();
     final refreshToken = prefs.getString('refreshToken');

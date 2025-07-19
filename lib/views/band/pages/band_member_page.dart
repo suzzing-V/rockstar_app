@@ -7,16 +7,13 @@ import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/services/api/band_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/band/dialogs/band_url_dialog.dart';
-import 'package:rockstar_app/views/band/pages/create_schedule_page.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandMemberPage extends StatefulWidget {
   final int bandId;
-  final String bandName;
 
-  const BandMemberPage(
-      {super.key, required this.bandId, required this.bandName});
+  const BandMemberPage({super.key, required this.bandId});
 
   @override
   State<BandMemberPage> createState() => _BandMemberPageState();
@@ -205,17 +202,5 @@ class _BandMemberPageState extends State<BandMemberPage> {
       // TODO: 서버 오류 시 행동
       print("밴드 목록 불러오기 실패: ${jsonDecode(utf8.decode(response.bodyBytes))}");
     }
-  }
-
-  void toCreateSchedulePage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CreateSchedulePage(
-          bandId: widget.bandId,
-          bandName: widget.bandName,
-        ),
-      ),
-    );
   }
 }

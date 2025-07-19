@@ -14,10 +14,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class BandSchedulePage extends StatefulWidget {
   final int bandId;
-  final String bandName;
 
-  const BandSchedulePage(
-      {super.key, required this.bandId, required this.bandName});
+  const BandSchedulePage({super.key, required this.bandId});
 
   @override
   State<BandSchedulePage> createState() => _BandSchedulePageState();
@@ -113,7 +111,7 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
           child: Align(
             alignment: Alignment.center,
             child: AddIconButton(
-              onPressed: () {
+              onPressed: () async {
                 toCreateSchedulePage(context);
               },
             ),
@@ -207,15 +205,23 @@ class _BandSchedulePageState extends State<BandSchedulePage> {
     ]);
   }
 
-  void toCreateSchedulePage(BuildContext context) {
-    Navigator.push(
+  Future<void> toCreateSchedulePage(BuildContext context) async {
+    final isUpdated = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => CreateSchedulePage(
           bandId: widget.bandId,
-          bandName: widget.bandName,
         ),
       ),
     );
+
+    if (isUpdated == true) {
+      setState(() {
+        schedules.clear();
+        _currentPage = 0;
+        _hasMore = true;
+      });
+      await getBandSchedules();
+    }
   }
 }

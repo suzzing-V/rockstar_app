@@ -16,10 +16,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateSchedulePage extends StatefulWidget {
   final int bandId;
-  final String bandName;
 
-  const CreateSchedulePage(
-      {super.key, required this.bandId, required this.bandName});
+  const CreateSchedulePage({super.key, required this.bandId});
 
   @override
   State<CreateSchedulePage> createState() => _CreateSchedulePageState();
@@ -42,7 +40,7 @@ class _CreateSchedulePageState extends State<CreateSchedulePage> {
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
         print('일정 생성 성공: $responseBody');
-        toBandPage(context);
+        Navigator.pop(context, true);
       } else if (response.statusCode == 400) {
         showDialog(
           context: context,
@@ -170,19 +168,6 @@ class _CreateSchedulePageState extends State<CreateSchedulePage> {
         builder: (context) => AnimatedStartPage(),
       ),
       (Route<dynamic> route) => false,
-    );
-  }
-
-  void toBandPage(BuildContext context) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BandPage(
-          bandId: widget.bandId,
-          bandName: widget.bandName,
-        ),
-      ),
-      (route) => route.isFirst, // HomePage가 첫 번째 페이지일 경우 유지
     );
   }
 }

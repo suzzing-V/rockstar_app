@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/icon/crown_icon.dart';
 import 'package:rockstar_app/common/listtile/drawer_list_tile.dart';
 import 'package:rockstar_app/common/text/primary_text.dart';
+import 'package:rockstar_app/views/band/pages/update_band_name_page.dart';
 
 class BandDrawer extends StatelessWidget {
   final String nickname;
   final bool isManager;
   final int bandId;
   final String bandName;
+  final void Function(String newBandName) onBandNameChanged;
 
   const BandDrawer({
     super.key,
@@ -15,6 +17,7 @@ class BandDrawer extends StatelessWidget {
     required this.isManager,
     required this.bandId,
     required this.bandName,
+    required this.onBandNameChanged,
   });
 
   @override
@@ -51,12 +54,14 @@ class BandDrawer extends StatelessWidget {
             DrawerListTile(
               label: '밴드 이름 수정하기',
               icon: const Icon(Icons.edit),
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                final String newBandName = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const Placeholder()), // TODO
+                      builder: (context) =>
+                          UpdateBandNamePage(bandId: bandId)), // TODO
                 );
+                onBandNameChanged(newBandName); // ✅ true만 전달
               },
             ),
           DrawerListTile(

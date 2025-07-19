@@ -51,4 +51,38 @@ class BandService {
       },
     );
   }
+
+  static Future<http.Response> updateBandName(
+      int bandId, String bandName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/name");
+
+    return http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode({
+        'name': bandName,
+        'bandId': bandId,
+      }),
+    );
+  }
+
+  static Future getBandInfo(int bandId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/$bandId");
+
+    return http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+  }
 }

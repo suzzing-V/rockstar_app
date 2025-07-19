@@ -6,16 +6,14 @@ import 'package:rockstar_app/services/api/news_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/band/container/news_box.dart';
 import 'package:rockstar_app/views/band/container/news_box_delete.dart';
-import 'package:rockstar_app/views/band/pages/create_schedule_page.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:rockstar_app/views/band/pages/schedule_info_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandNewsPage extends StatefulWidget {
   final int bandId;
-  final String bandName;
 
-  const BandNewsPage({super.key, required this.bandId, required this.bandName});
+  const BandNewsPage({super.key, required this.bandId});
 
   @override
   State<BandNewsPage> createState() => _BandNewsPageState();
@@ -171,17 +169,5 @@ class _BandNewsPageState extends State<BandNewsPage> {
                 },
               ))),
     ]);
-  }
-
-  void toCreateSchedulePage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CreateSchedulePage(
-          bandId: widget.bandId,
-          bandName: widget.bandName,
-        ),
-      ),
-    );
   }
 }
