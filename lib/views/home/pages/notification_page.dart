@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/appBar/default_app_bar.dart';
+import 'package:rockstar_app/common/dialog/one_button_dialog.dart';
 import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/common/text/primary_text.dart';
 import 'package:rockstar_app/services/api/notification_service.dart';
@@ -93,6 +94,43 @@ class _NotificationPageState extends State<NotificationPage> {
     setState(() => _isLoading = false);
   }
 
+  Future<void> readNotification(int notificationId) async {
+    final response = await NotificationService.read(notificationId);
+    if (response.statusCode == 200) {
+      print("알림 읽기: ${utf8.decode(response.bodyBytes)}");
+    } else if (response.statusCode == 404) {
+      showDialog(
+        context: context,
+        builder: (context) => OneButtonDialog(
+            title: '존재하지 않는 알림입니다.',
+            onConfirm: () => {
+                  Navigator.of(context).pop(),
+                }),
+      );
+    } else if (response.statusCode == 401) {
+      final retryResponse = await UserService.reissueToken();
+      if (retryResponse.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(retryResponse.bodyBytes));
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', decoded['accessToken']);
+        await prefs.setString('refreshToken', decoded['refreshToken']);
+        getNotifications(); // 재시도
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnimatedStartPage(),
+          ),
+          (Route<dynamic> route) => false,
+        );
+      }
+    } else {
+      print("알림 불러오기 실패: ${utf8.decode(response.bodyBytes)}");
+    }
+
+    setState(() => _isLoading = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,7 +167,14 @@ class _NotificationPageState extends State<NotificationPage> {
                           final noti = notifications[index];
                           return InkWell(
                             onTap: () async {
+                              int notiUserId = noti['notificationUserId'];
                               String type = noti['notificationType'];
+                              if (!noti['isRead']) {
+                                readNotification(notiUserId);
+                                setState(() {
+                                  noti['isRead'] = true;
+                                });
+                              }
 
                               if (type == 'SCHEDULE_CREATED' ||
                                   type == 'SCHEDULE_UPDATED') {

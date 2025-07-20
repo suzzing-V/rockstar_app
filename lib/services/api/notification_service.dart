@@ -17,4 +17,19 @@ class NotificationService {
     );
     return response;
   }
+
+  static Future read(int notiUserId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final url = Uri.parse(
+        "https://${ApiCall.host}/api/v0/notification/read/$notiUserId");
+    final response = await http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken'
+      },
+    );
+    return response;
+  }
 }
