@@ -9,8 +9,8 @@ class BandService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url =
-        Uri.parse("http://${ApiCall.host}/api/v0/band/user?page=$page&size=10");
+    final url = Uri.parse(
+        "https://${ApiCall.host}/api/v0/band/user?page=$page&size=10");
 
     return http.get(
       url,
@@ -24,7 +24,7 @@ class BandService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/band");
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/band");
 
     return http.post(
       url,
@@ -42,7 +42,7 @@ class BandService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/url/$bandId");
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/band/url/$bandId");
 
     return http.get(
       url,
@@ -57,7 +57,7 @@ class BandService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/name");
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/band/name");
 
     return http.patch(
       url,
@@ -76,7 +76,7 @@ class BandService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/$bandId");
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/band/$bandId");
 
     return http.get(
       url,
@@ -90,7 +90,7 @@ class BandService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/user/$bandId");
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/band/user/$bandId");
 
     return http.delete(
       url,
@@ -104,7 +104,7 @@ class BandService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/$bandId");
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/band/$bandId");
 
     return http.delete(
       url,
@@ -118,7 +118,7 @@ class BandService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/band/manager");
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/band/manager");
 
     return http.patch(
       url,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:rockstar_app/common/dialog/one_button_dialog.dart';
 import 'package:rockstar_app/services/api/band_service.dart';
 import 'package:rockstar_app/views/band/appbar/band_app_bar.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
@@ -29,6 +30,7 @@ class _BandPageState extends State<BandPage> {
   String bandName = "";
   int? userId;
   int? managerId;
+  bool _bandLoaded = false;
 
   int _selectedIndex = 0;
 
@@ -101,8 +103,19 @@ class _BandPageState extends State<BandPage> {
       setState(() {
         bandName = decoded['name'];
         managerId = decoded['managerId'];
+        _bandLoaded = true;
       });
       print("유저 정보 불러오기 성공: $decoded");
+    } else if (response.statusCode == 404) {
+      showDialog(
+        context: context,
+        builder: (context) => OneButtonDialog(
+            title: '존재하지 않는 밴드입니다.',
+            onConfirm: () => {
+                  Navigator.of(context).pop(),
+                  Navigator.of(context).pop(),
+                }),
+      );
     } else if (response.statusCode == 401) {
       final response = await UserService.reissueToken();
 
@@ -165,22 +178,26 @@ class _BandPageState extends State<BandPage> {
           }
         },
       ),
-      body: SafeArea(
-        bottom: false,
-        // ✅ 이거 추가
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: pages,
-        ),
-      ),
-      bottomNavigationBar: BandBottomNavBar(
-        selectedIndex: _selectedIndex,
-        onItemSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
+      body: _bandLoaded
+          ? SafeArea(
+              bottom: false,
+              // ✅ 이거 추가
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: pages,
+              ),
+            )
+          : const SizedBox.shrink(),
+      bottomNavigationBar: _bandLoaded
+          ? BandBottomNavBar(
+              selectedIndex: _selectedIndex,
+              onItemSelected: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            )
+          : const SizedBox.shrink(),
     );
   }
 }

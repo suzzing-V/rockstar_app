@@ -7,7 +7,6 @@ import 'package:rockstar_app/common/text/main_text.dart';
 import 'package:rockstar_app/services/api/band_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
-import 'package:rockstar_app/views/band/band_page.dart';
 import 'package:rockstar_app/views/home/dialogs/one_title_two_button_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

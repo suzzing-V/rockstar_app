@@ -44,8 +44,8 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
     final refreshToken = prefs.getString('refreshToken');
     print(accessToken);
     print('refresh:$refreshToken');
-    final response =
-        await ScheduleService.getSchedule(widget.scheduleId, widget.bandId);
+    final response = await ScheduleService.getScheduleOfBand(
+        widget.scheduleId, widget.bandId);
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));

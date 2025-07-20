@@ -16,7 +16,7 @@ class ScheduleService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/schedule");
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/schedule");
 
     return http.post(
       url,
@@ -41,12 +41,13 @@ class ScheduleService {
     );
   }
 
-  static Future<http.Response> getSchedule(int scheduleId, int bandId) async {
+  static Future<http.Response> getScheduleOfBand(
+      int scheduleId, int bandId) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url =
-        Uri.parse("http://${ApiCall.host}/api/v0/schedule/$bandId/$scheduleId");
+    final url = Uri.parse(
+        "https://${ApiCall.host}/api/v0/schedule/$bandId/$scheduleId");
 
     return http.get(
       url,
@@ -67,7 +68,8 @@ class ScheduleService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/schedule/$scheduleId");
+    final url =
+        Uri.parse("https://${ApiCall.host}/api/v0/schedule/$scheduleId");
 
     return http.put(
       url,
@@ -95,7 +97,8 @@ class ScheduleService {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse("http://${ApiCall.host}/api/v0/schedule/$scheduleId");
+    final url =
+        Uri.parse("https://${ApiCall.host}/api/v0/schedule/$scheduleId");
 
     return http.delete(
       url,
@@ -111,7 +114,22 @@ class ScheduleService {
     final accessToken = prefs.getString('accessToken');
 
     final url = Uri.parse(
-        "http://${ApiCall.host}/api/v0/schedule/band/$bandId?page=$page&size=10");
+        "https://${ApiCall.host}/api/v0/schedule/band/$bandId?page=$page&size=10");
+
+    return http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+  }
+
+  static Future getSchedule(int scheduleId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url =
+        Uri.parse("https://${ApiCall.host}/api/v0/schedule/$scheduleId");
 
     return http.get(
       url,

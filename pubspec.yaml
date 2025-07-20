@@ -19,7 +19,7 @@ dependencies:
   font_awesome_flutter: ^10.7.0 
   flutter_localizations:
     sdk: flutter
-  uni_links: ^0.5.1
+  app_links: ^6.4.0
 
 dev_dependencies:
   flutter_test:

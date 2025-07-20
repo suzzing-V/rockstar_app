@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:app_links/app_links.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,39 +13,29 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
-  // TODO: 테스트용 자동 로그인 해제
   String? accessToken = prefs.getString('accessToken');
   String? refreshToken = prefs.getString('refreshToken');
-  // String? accessToken = null;
-  // String? refreshToken = null;
 
-  print(accessToken);
-  // 앱 시작할 때마다 토큰 재발급
   if (refreshToken != null) {
     final response = await UserService.reissueToken();
-
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-      final prefs = await SharedPreferences.getInstance();
-
       prefs.setString('accessToken', decoded['accessToken']);
       prefs.setString('refreshToken', decoded['refreshToken']);
 
       accessToken = decoded['accessToken'];
       refreshToken = decoded['refreshToken'];
     } else if (response.statusCode == 401) {
-      // refresh token 만료 시
       prefs.remove('accessToken');
       prefs.remove('refreshToken');
       accessToken = null;
       refreshToken = null;
-    } else {
-      // TODO: 서버 오류 시 행동
     }
   }
 
-  print("new $accessToken");
-  runApp(MyApp(isLoggedIn: accessToken != null && refreshToken != null));
+  runApp(
+    MyApp(isLoggedIn: accessToken != null && refreshToken != null),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -60,8 +52,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           pageTransitionsTheme: PageTransitionsTheme(
             builders: {
-              TargetPlatform.android:
-                  CupertinoPageTransitionsBuilder(), // 예: iOS 스타일
+              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
               TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
               TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
             },
@@ -70,15 +61,17 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 41, 15, 64)),
         ),
-        home: SplashRouterPage(isLoggedIn: isLoggedIn),
+        home: DeepLinkHandler(
+          child: SplashRouterPage(isLoggedIn: isLoggedIn),
+        ),
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: const [
-          Locale('ko'), // ✅ 한국어 추가
-          Locale('en'), // 기본 영어
+          Locale('ko'),
+          Locale('en'),
         ],
       ),
     );
@@ -87,4 +80,57 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
+}
+
+class DeepLinkHandler extends StatefulWidget {
+  final Widget child;
+
+  const DeepLinkHandler({required this.child, super.key});
+
+  @override
+  State<DeepLinkHandler> createState() => _DeepLinkHandlerState();
+}
+
+class _DeepLinkHandlerState extends State<DeepLinkHandler> {
+  final AppLinks _appLinks = AppLinks();
+  StreamSubscription<Uri>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 앱 실행 중 딥링크 수신
+    _sub = _appLinks.uriLinkStream.listen((Uri uri) {
+      _handleUri(uri);
+    });
+
+    // 앱 처음 실행 시 딥링크 수신
+    _appLinks.getInitialLink().then((Uri? uri) {
+      if (uri != null) {
+        _handleUri(uri);
+      }
+    });
+  }
+
+  void _handleUri(Uri uri) {
+    print("💡 딥링크 URI 수신: $uri");
+
+    if (uri.host == 'invite' || uri.path.contains('/invite')) {
+      final code = uri.pathSegments.last;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushNamed('/invite/$code');
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }

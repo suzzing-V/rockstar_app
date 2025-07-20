@@ -97,7 +97,7 @@ class _UpdateBandNamePageState extends State<UpdateBandNamePage> {
                     keyboardType: TextInputType.text,
                     onChanged: _onChange,
                     inputFormatters: [
-                      LengthLimitingTextInputFormatter(30),
+                      LengthLimitingTextInputFormatter(20),
                     ],
                     style: TextStyle(
                       fontFamily: 'PixelFont',

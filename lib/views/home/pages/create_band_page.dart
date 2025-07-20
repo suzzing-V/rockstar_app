@@ -93,7 +93,7 @@ class _CreateBandPageState extends State<CreateBandPage> {
                     keyboardType: TextInputType.text,
                     onChanged: _onChange,
                     inputFormatters: [
-                      LengthLimitingTextInputFormatter(30),
+                      LengthLimitingTextInputFormatter(20),
                     ],
                     style: TextStyle(
                       fontFamily: 'PixelFont',

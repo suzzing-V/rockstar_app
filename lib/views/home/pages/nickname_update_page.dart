@@ -52,7 +52,7 @@ class _NicknameUpdatePageState extends State<NicknameUpdatePage> {
                     keyboardType: TextInputType.text,
                     onChanged: _onChange,
                     inputFormatters: [
-                      LengthLimitingTextInputFormatter(20),
+                      LengthLimitingTextInputFormatter(10),
                       FilteringTextInputFormatter.deny(
                           RegExp(r'\s')), // 공백 문자 차단
                     ],
