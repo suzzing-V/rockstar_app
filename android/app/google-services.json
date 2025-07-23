@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "491163937365",
+    "project_id": "rockstar-f9295",
+    "storage_bucket": "rockstar-f9295.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:491163937365:android:d7d77160c13dfb0b2782dc",
+        "android_client_info": {
+          "package_name": "com.example.rockstar_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnE8kFhNP9osUJSJ1KJUozpaVKgzAyZ6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

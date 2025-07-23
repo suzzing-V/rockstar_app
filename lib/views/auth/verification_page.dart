@@ -27,7 +27,7 @@ class _VerificationPageState extends State<VerificationPage> {
   final _controller = TextEditingController();
   String? errorMessage;
   late Timer _timer;
-  int _remainingSeconds = 10;
+  int _remainingSeconds = 60;
   String get timerText {
     final minutes = (_remainingSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (_remainingSeconds % 60).toString().padLeft(2, '0');
