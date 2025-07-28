@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rockstar_app/common/appBar/default_app_bar.dart';
@@ -127,6 +128,11 @@ class _VerificationPageState extends State<VerificationPage> {
 
         print(widget.isNew);
         print('인증 성공: $responseBody');
+
+        final String? fcmToken = prefs.getString('fcmToken');
+        // 기기에 저장된 fcm 토큰과 새로 받아온 fcm 토큰이 다를 경우 갱신
+        print("fcm token 저장: $fcmToken");
+        if (fcmToken != null) saveFcmToken(fcmToken);
         if (nickname == null) {
           print('닉네임 없음');
           toNicknamePage(context);
@@ -288,5 +294,39 @@ class _VerificationPageState extends State<VerificationPage> {
       context,
       MaterialPageRoute(builder: (context) => NicknamePage()),
     );
+  }
+
+  saveFcmToken(String fcmToken) async {
+    final response = await UserService.updateFcmToken(fcmToken);
+
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      print('갱신 성공: $responseBody');
+    } else if (response.statusCode == 401) {
+      final response = await UserService.reissueToken();
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', decoded['accessToken']);
+        await prefs.setString('refreshToken', decoded['refreshToken']);
+
+        /// ✅ 토큰 재발급 성공 후 재시도
+        final retry = await UserService.updateFcmToken(fcmToken);
+        if (retry.statusCode != 200) {
+          // TODO: 오류 발생 시 행동
+        }
+      } else if (response.statusCode == 401) {
+        // refresh token 만료 시
+        toAnimatedStartPage(context);
+        return;
+      } else {
+        // TODO: 서버 오류 시 행동
+      }
+    } else if (response.statusCode == 404) {
+      print('fcm 토큰 정보없음 : ${response.body}');
+    } else {
+      print('갱신 실패: ${response.body}');
+    }
   }
 }

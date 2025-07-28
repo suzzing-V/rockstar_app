@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:rockstar_app/common/buttons/primary_button.dart';
 import 'package:rockstar_app/common/buttons/secondary_button.dart';
@@ -13,7 +14,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SplashRouterPage extends StatelessWidget {
   final bool isLoggedIn;
 
-  const SplashRouterPage({super.key, required this.isLoggedIn});
+  const SplashRouterPage({
+    super.key,
+    required this.isLoggedIn,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +27,9 @@ class SplashRouterPage extends StatelessWidget {
 }
 
 class StartPage extends StatefulWidget {
-  const StartPage({super.key});
+  const StartPage({
+    super.key,
+  });
 
   @override
   State<StartPage> createState() => _StartPageState();
@@ -33,8 +39,7 @@ class _StartPageState extends State<StartPage> {
   @override
   void initState() {
     super.initState();
-
-    getUserInfo();
+    Future.microtask(() => getUserInfo());
   }
 
   @override
@@ -57,6 +62,40 @@ class _StartPageState extends State<StartPage> {
     );
   }
 
+  saveFcmToken(String fcmToken) async {
+    final response = await UserService.updateFcmToken(fcmToken);
+
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      print('갱신 성공: $responseBody');
+    } else if (response.statusCode == 401) {
+      final response = await UserService.reissueToken();
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', decoded['accessToken']);
+        await prefs.setString('refreshToken', decoded['refreshToken']);
+
+        /// ✅ 토큰 재발급 성공 후 재시도
+        final retry = await UserService.updateFcmToken(fcmToken);
+        if (retry.statusCode != 200) {
+          // TODO: 오류 발생 시 행동
+        }
+      } else if (response.statusCode == 401) {
+        // refresh token 만료 시
+        toAnimatedStartPage();
+        return;
+      } else {
+        // TODO: 서버 오류 시 행동
+      }
+    } else if (response.statusCode == 404) {
+      print('fcm 토큰 정보없음 : ${response.body}');
+    } else {
+      print('갱신 실패: ${response.body}');
+    }
+  }
+
   void getUserInfo() {
     Future.delayed(const Duration(seconds: 1), () async {
       final response = await UserService.getUserInfo();
@@ -67,6 +106,14 @@ class _StartPageState extends State<StartPage> {
         final nickname = decoded['nickname'];
         print('유저 조회 성공: $decoded');
 
+        final prefs = await SharedPreferences.getInstance();
+        final bool? isFcmTokenUpdated = prefs.getBool('isFcmTokenUpdated');
+        final String? fcmToken = prefs.getString('fcmToken');
+        print('$isFcmTokenUpdated $fcmToken');
+        if (isFcmTokenUpdated == true && fcmToken != null) {
+          // 기기에 저장된 fcm 토큰과 새로 받아온 fcm 토큰이 다를 경우 갱신
+          saveFcmToken(fcmToken);
+        }
         if (nickname == null) {
           toNicknamePage();
           return;

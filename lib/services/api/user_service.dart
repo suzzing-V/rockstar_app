@@ -122,4 +122,19 @@ class UserService {
       },
     );
   }
+
+  static Future<http.Response> updateFcmToken(String fcmToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/user/fcm");
+    return http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode({'fcmToken': fcmToken}),
+    );
+  }
 }

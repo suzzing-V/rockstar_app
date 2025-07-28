@@ -1,17 +1,119 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:app_links/app_links.dart';
 import 'package:english_words/english_words.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
+import 'firebase_options.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+// 🔔 로컬 알림 플러그인 전역 객체
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+// 🔔 로컬 알림 초기화 함수
+Future<void> initializeLocalNotification() async {
+  const AndroidInitializationSettings androidInitSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const DarwinInitializationSettings iosInitSettings =
+      DarwinInitializationSettings();
+
+  const InitializationSettings initSettings = InitializationSettings(
+    android: androidInitSettings,
+    iOS: iosInitSettings,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initSettings);
+}
+
+// 🔁 백그라운드 메시지 핸들러
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  print('📩 백그라운드 메시지 수신: ${message.messageId}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await initializeLocalNotification(); // ✅ 알림 초기화
+
+  if (Platform.isIOS) {
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    print('🔐 권한 상태: ${settings.authorizationStatus}');
+  }
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // ✅ 포그라운드 메시지 수신 처리
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('🟢 포그라운드 메시지 수신: ${message.notification?.title}');
+
+    RemoteNotification? notification = message.notification;
+    AppleNotification? apple = message.notification?.apple;
+
+    if (notification != null) {
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        const NotificationDetails(
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+          android: AndroidNotificationDetails(
+            'default_channel',
+            '기본 채널',
+            importance: Importance.max,
+            priority: Priority.high,
+            playSound: true,
+          ),
+        ),
+      );
+    }
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('📲 알림 클릭 후 앱 오픈: ${message.notification?.title}');
+    // TODO: 특정 화면 이동 처리
+  });
+
+  String? fcmToken = await FirebaseMessaging.instance.getToken();
+  print('📱 디바이스 FCM 토큰: $fcmToken');
+  if (fcmToken == null) {
+    debugPrint("⚠️ FCM 토큰이 null입니다.");
+  } else {
+    final prefs = await SharedPreferences.getInstance();
+    String? savedFcmToken = prefs.getString('fcmToken');
+    if (savedFcmToken == null || fcmToken != savedFcmToken) {
+      print('📌 fcmToken 저장됨');
+      prefs.setString('fcmToken', fcmToken);
+      prefs.setBool('isFcmTokenUpdated', true);
+    } else {
+      prefs.setBool('isFcmTokenUpdated', false);
+    }
+  }
+
   final prefs = await SharedPreferences.getInstance();
   String? accessToken = prefs.getString('accessToken');
   String? refreshToken = prefs.getString('refreshToken');
@@ -22,7 +124,6 @@ void main() async {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       prefs.setString('accessToken', decoded['accessToken']);
       prefs.setString('refreshToken', decoded['refreshToken']);
-
       accessToken = decoded['accessToken'];
       refreshToken = decoded['refreshToken'];
     } else if (response.statusCode == 401) {
@@ -33,6 +134,7 @@ void main() async {
     }
   }
 
+  print('runApp 실행전');
   runApp(
     MyApp(isLoggedIn: accessToken != null && refreshToken != null),
   );
@@ -99,12 +201,10 @@ class _DeepLinkHandlerState extends State<DeepLinkHandler> {
   void initState() {
     super.initState();
 
-    // 앱 실행 중 딥링크 수신
     _sub = _appLinks.uriLinkStream.listen((Uri uri) {
       _handleUri(uri);
     });
 
-    // 앱 처음 실행 시 딥링크 수신
     _appLinks.getInitialLink().then((Uri? uri) {
       if (uri != null) {
         _handleUri(uri);
@@ -114,7 +214,6 @@ class _DeepLinkHandlerState extends State<DeepLinkHandler> {
 
   void _handleUri(Uri uri) {
     print("💡 딥링크 URI 수신: $uri");
-
     if (uri.host == 'invite' || uri.path.contains('/invite')) {
       final code = uri.pathSegments.last;
       WidgetsBinding.instance.addPostFrameCallback((_) {
