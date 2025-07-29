@@ -9,6 +9,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
+import 'package:rockstar_app/views/band/band_page.dart';
+import 'package:rockstar_app/views/band/pages/band_schedule_page.dart';
+import 'package:rockstar_app/views/band/pages/schedule_info_page.dart';
 import 'firebase_options.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
@@ -18,6 +21,46 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 // 🔔 로컬 알림 플러그인 전역 객체
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
+
+// ✅ navigatorKey 전역 선언
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// ✅ 알림 클릭 시 초기 메시지 저장용
+RemoteMessage? _initialMessage;
+
+void _handleLocalNotificationTap(String? payload) {
+  if (payload == null) return;
+
+  final data = jsonDecode(payload);
+  final type = data['type'];
+
+  if (type == 'SCHEDULE_INFO') {
+    final scheduleId = int.tryParse(data['scheduleId'] ?? '');
+    final bandId = int.tryParse(data['bandId'] ?? '');
+    if (scheduleId != null && bandId != null) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => ScheduleInfoPage(
+            scheduleId: scheduleId,
+            bandId: bandId,
+          ),
+        ),
+      );
+    }
+  }
+  if (type == 'SCHEDULE_LIST') {
+    final bandId = int.tryParse(data['bandId'] ?? '');
+    if (bandId != null) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => BandPage(
+            bandId: bandId,
+          ),
+        ),
+      );
+    }
+  }
+}
 
 // 🔔 로컬 알림 초기화 함수
 Future<void> initializeLocalNotification() async {
@@ -32,7 +75,12 @@ Future<void> initializeLocalNotification() async {
     iOS: iosInitSettings,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(initSettings);
+  await flutterLocalNotificationsPlugin.initialize(
+    initSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) {
+      _handleLocalNotificationTap(response.payload);
+    },
+  );
 }
 
 // 🔁 백그라운드 메시지 핸들러
@@ -49,7 +97,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await initializeLocalNotification(); // ✅ 알림 초기화
+  await initializeLocalNotification();
 
   if (Platform.isIOS) {
     NotificationSettings settings =
@@ -63,12 +111,10 @@ void main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // ✅ 포그라운드 메시지 수신 처리
+  // ✅ 포그라운드 수신 → 로컬 알림 띄우기
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print('🟢 포그라운드 메시지 수신: ${message.notification?.title}');
-
     RemoteNotification? notification = message.notification;
-    AppleNotification? apple = message.notification?.apple;
 
     if (notification != null) {
       flutterLocalNotificationsPlugin.show(
@@ -89,24 +135,27 @@ void main() async {
             playSound: true,
           ),
         ),
+        payload: jsonEncode(message.data),
       );
     }
   });
 
+  // ✅ 백그라운드 상태 → 알림 클릭 시
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     print('📲 알림 클릭 후 앱 오픈: ${message.notification?.title}');
-    // TODO: 특정 화면 이동 처리
+    _handleNotificationTap(message);
   });
 
+  // ✅ 종료 상태 → 알림 클릭 시
+  _initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+
+  // ✅ FCM 토큰 저장
   String? fcmToken = await FirebaseMessaging.instance.getToken();
   print('📱 디바이스 FCM 토큰: $fcmToken');
-  if (fcmToken == null) {
-    debugPrint("⚠️ FCM 토큰이 null입니다.");
-  } else {
+  if (fcmToken != null) {
     final prefs = await SharedPreferences.getInstance();
     String? savedFcmToken = prefs.getString('fcmToken');
     if (savedFcmToken == null || fcmToken != savedFcmToken) {
-      print('📌 fcmToken 저장됨');
       prefs.setString('fcmToken', fcmToken);
       prefs.setBool('isFcmTokenUpdated', true);
     } else {
@@ -134,10 +183,7 @@ void main() async {
     }
   }
 
-  print('runApp 실행전');
-  runApp(
-    MyApp(isLoggedIn: accessToken != null && refreshToken != null),
-  );
+  runApp(MyApp(isLoggedIn: accessToken != null && refreshToken != null));
 }
 
 class MyApp extends StatelessWidget {
@@ -150,9 +196,10 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
+        navigatorKey: navigatorKey, // ✅ 여기 중요
         title: 'Rockstar',
         theme: ThemeData(
-          pageTransitionsTheme: PageTransitionsTheme(
+          pageTransitionsTheme: const PageTransitionsTheme(
             builders: {
               TargetPlatform.android: CupertinoPageTransitionsBuilder(),
               TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
@@ -166,6 +213,16 @@ class MyApp extends StatelessWidget {
         home: DeepLinkHandler(
           child: SplashRouterPage(isLoggedIn: isLoggedIn),
         ),
+        builder: (context, child) {
+          // ✅ 앱 종료 → 알림 클릭 시 한 번만 처리
+          if (_initialMessage != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _handleNotificationTap(_initialMessage!);
+              _initialMessage = null;
+            });
+          }
+          return child!;
+        },
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
@@ -184,6 +241,40 @@ class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
 }
 
+// ✅ 푸시 알림 클릭 처리
+void _handleNotificationTap(RemoteMessage message) {
+  final data = message.data;
+  final type = data['type'];
+
+  if (type == 'SCHEDULE_INFO') {
+    final scheduleId = int.tryParse(data['scheduleId'] ?? '');
+    final bandId = int.tryParse(data['bandId'] ?? '');
+    if (scheduleId != null && bandId != null) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => ScheduleInfoPage(
+            scheduleId: scheduleId,
+            bandId: bandId,
+          ),
+        ),
+      );
+    }
+  }
+  if (type == 'SCHEDULE_LIST') {
+    final bandId = int.tryParse(data['bandId'] ?? '');
+    if (bandId != null) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => BandPage(
+            bandId: bandId,
+          ),
+        ),
+      );
+    }
+  }
+}
+
+// ✅ 딥링크 핸들러 (기존 코드 그대로)
 class DeepLinkHandler extends StatefulWidget {
   final Widget child;
 
