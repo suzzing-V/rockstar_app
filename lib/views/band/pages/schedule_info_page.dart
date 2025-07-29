@@ -133,7 +133,8 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
                         width: 20,
                       ),
                       MainText(
-                        label: _startTime.format(context),
+                        label:
+                            '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}',
                         fontSize: 23,
                       ),
                     ],
@@ -159,7 +160,8 @@ class _ScheduleInfoPageState extends State<ScheduleInfoPage> {
                         width: 20,
                       ),
                       MainText(
-                        label: _endTime.format(context),
+                        label:
+                            '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}',
                         fontSize: 23,
                       ),
                     ],

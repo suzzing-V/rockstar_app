@@ -28,33 +28,37 @@ class TimePickerButton extends StatelessWidget {
           initialTime: initialTime,
           initialEntryMode: TimePickerEntryMode.input,
           builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                timePickerTheme: TimePickerThemeData(
-                  backgroundColor:
-                      Theme.of(context).colorScheme.secondaryContainer,
-                  hourMinuteTextStyle: TextStyle(
-                    fontFamily: 'PixelFont',
-                    fontSize: 32,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  dayPeriodTextStyle: const TextStyle(
-                    fontFamily: 'PixelFont',
-                    fontSize: 20,
-                  ),
-                  helpTextStyle: TextStyle(
-                    fontFamily: 'PixelFont',
-                    fontSize: 16,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                  dialTextColor: Theme.of(context).colorScheme.primary,
-                  entryModeIconColor: Theme.of(context).colorScheme.primary,
-                ),
-                textTheme: Theme.of(context).textTheme.apply(
+            return MediaQuery(
+              data:
+                  MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  timePickerTheme: TimePickerThemeData(
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
+                    hourMinuteTextStyle: TextStyle(
                       fontFamily: 'PixelFont',
+                      fontSize: 32,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
+                    dayPeriodTextStyle: const TextStyle(
+                      fontFamily: 'PixelFont',
+                      fontSize: 20,
+                    ),
+                    helpTextStyle: TextStyle(
+                      fontFamily: 'PixelFont',
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    dialTextColor: Theme.of(context).colorScheme.primary,
+                    entryModeIconColor: Theme.of(context).colorScheme.primary,
+                  ),
+                  textTheme: Theme.of(context).textTheme.apply(
+                        fontFamily: 'PixelFont',
+                      ),
+                ),
+                child: child!,
               ),
-              child: child!,
             );
           },
         );
@@ -65,7 +69,7 @@ class TimePickerButton extends StatelessWidget {
       },
       child: Center(
         child: Text(
-          initialTime.format(context),
+          '${initialTime.hour.toString().padLeft(2, '0')}:${initialTime.minute.toString().padLeft(2, '0')}',
           style: const TextStyle(
             fontFamily: 'PixelFont',
             fontSize: 23,
