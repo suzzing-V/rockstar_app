@@ -27,9 +27,8 @@ class InvitationPage extends StatefulWidget {
 class _InvitationPageState extends State<InvitationPage> {
   List<Map<String, dynamic>> invitations = [];
   bool isEmptyList = false;
-  bool _isLoading = false;
-  bool _hasMore = true;
-  bool isSelected = false;
+  // 클래스 안에 변수 추가
+  Map<int, bool> _responded = {};
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -47,17 +46,10 @@ class _InvitationPageState extends State<InvitationPage> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      if (_hasMore && !_isLoading) {
-        getInvitations();
-      }
-    }
+        _scrollController.position.maxScrollExtent - 200) {}
   }
 
   Future<void> getInvitations() async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
-
     final response = await InvitationService.getInvitations();
     print('${jsonDecode(utf8.decode(response.bodyBytes))}');
     if (response.statusCode == 200) {
@@ -89,8 +81,6 @@ class _InvitationPageState extends State<InvitationPage> {
     } else {
       print("알림 불러오기 실패: ${utf8.decode(response.bodyBytes)}");
     }
-
-    setState(() => _isLoading = false);
   }
 
   void acceptInvitation(int bandId) async {
@@ -100,7 +90,7 @@ class _InvitationPageState extends State<InvitationPage> {
       final responseBody = jsonDecode(response.body);
       print('멤버 초대 성공: $responseBody');
       setState(() {
-        isSelected = true; // ✅ 초대 성공 후 버튼 숨기기
+        _responded[bandId] = true;
       });
     } else if (response.statusCode == 401) {
       final response = await UserService.reissueToken();
@@ -134,7 +124,7 @@ class _InvitationPageState extends State<InvitationPage> {
       final responseBody = jsonDecode(response.body);
       print('멤버 초대 성공: $responseBody');
       setState(() {
-        isSelected = true; // ✅ 초대 성공 후 버튼 숨기기
+        _responded[bandId] = true;
       });
     } else if (response.statusCode == 401) {
       final response = await UserService.reissueToken();
@@ -250,7 +240,8 @@ class _InvitationPageState extends State<InvitationPage> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    if (isSelected == false)
+                                    if (_responded[invitation['bandId']] !=
+                                        true)
                                       MiniPrimaryButton(
                                         onPressed: () => acceptInvitation(
                                             invitation['bandId']),
@@ -259,7 +250,8 @@ class _InvitationPageState extends State<InvitationPage> {
                                     SizedBox(
                                       width: 10,
                                     ),
-                                    if (isSelected == false)
+                                    if (_responded[invitation['bandId']] !=
+                                        true)
                                       MiniSecondaryButton(
                                         onPressed: () => rejectInvitation(
                                             invitation['bandId']),

@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:rockstar_app/views/band/band_page.dart';
 import 'package:rockstar_app/views/band/pages/band_schedule_page.dart';
 import 'package:rockstar_app/views/band/pages/schedule_info_page.dart';
+import 'package:rockstar_app/views/home/pages/invitation_page.dart';
 import 'firebase_options.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
@@ -49,6 +50,25 @@ void _handleLocalNotificationTap(String? payload) {
     }
   }
   if (type == 'SCHEDULE_LIST') {
+    final bandId = int.tryParse(data['bandId'] ?? '');
+    if (bandId != null) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => BandPage(
+            bandId: bandId,
+          ),
+        ),
+      );
+    }
+  }
+  if (type == 'INVITATION') {
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (_) => InvitationPage(),
+      ),
+    );
+  }
+  if (type == 'INVITATION_ACCEPT') {
     final bandId = int.tryParse(data['bandId'] ?? '');
     if (bandId != null) {
       navigatorKey.currentState?.push(
@@ -261,6 +281,25 @@ void _handleNotificationTap(RemoteMessage message) {
     }
   }
   if (type == 'SCHEDULE_LIST') {
+    final bandId = int.tryParse(data['bandId'] ?? '');
+    if (bandId != null) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => BandPage(
+            bandId: bandId,
+          ),
+        ),
+      );
+    }
+  }
+  if (type == 'INVITATION') {
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (_) => InvitationPage(),
+      ),
+    );
+  }
+  if (type == 'INVITATION_ACCEPT') {
     final bandId = int.tryParse(data['bandId'] ?? '');
     if (bandId != null) {
       navigatorKey.currentState?.push(
