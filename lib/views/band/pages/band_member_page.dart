@@ -8,6 +8,7 @@ import 'package:rockstar_app/services/api/band_service.dart';
 import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/band/dialogs/band_url_dialog.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
+import 'package:rockstar_app/views/band/pages/invite_member_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BandMemberPage extends StatefulWidget {
@@ -111,11 +112,11 @@ class _BandMemberPageState extends State<BandMemberPage> {
           alignment: Alignment.center,
           child: AddIconButton(
             onPressed: () async {
-              await getBandUrl(context);
-
-              showDialog(
-                  context: context,
-                  builder: (context) => BandUrlDialog(bandUrl: bandUrl));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => InviteMemberPage(bandId: widget.bandId)),
+              );
             },
           ),
         ),

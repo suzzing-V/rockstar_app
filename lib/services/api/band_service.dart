@@ -132,4 +132,23 @@ class BandService {
       }),
     );
   }
+
+  static Future<http.Response> inviteUser(int bandId, int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse("https://${ApiCall.host}/api/v0/invite");
+
+    return http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode({
+        'userId': userId,
+        'bandId': bandId,
+      }),
+    );
+  }
 }

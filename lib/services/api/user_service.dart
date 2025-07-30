@@ -137,4 +137,25 @@ class UserService {
       body: jsonEncode({'fcmToken': fcmToken}),
     );
   }
+
+  static Future<http.Response> searchByNickname(
+      int bandId, String nickname) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final encodedNickname = Uri.encodeQueryComponent(nickname);
+
+    final url = Uri.parse(
+      "https://${ApiCall.host}/api/v0/invite/search/$bandId/$encodedNickname",
+    );
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    return response;
+  }
 }

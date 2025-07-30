@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rockstar_app/views/home/pages/invitation_page.dart';
 import 'package:rockstar_app/views/home/pages/notification_page.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -28,6 +29,22 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 7, bottom: 6),
+          child: IconButton(
+            icon: const Icon(Icons.mail_outline),
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            iconSize: 30,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const InvitationPage(), // 알림 페이지
+                ),
+              );
+            },
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.only(right: 10, bottom: 6),
           child: IconButton(

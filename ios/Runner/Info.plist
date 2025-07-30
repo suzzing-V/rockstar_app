@@ -76,5 +76,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>AssociatedDomains</key>
+<array>
+  <string>applinks:my-rockstar.site</string>
+</array>
 </dict>
 </plist>
