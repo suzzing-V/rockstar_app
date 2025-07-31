@@ -12,6 +12,8 @@ class HighlightText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
+      softWrap: true, // ✅ 줄바꿈 허용
+      overflow: TextOverflow.visible,
       style: TextStyle(
         fontFamily: 'PixelFont',
         fontSize: fontSize,

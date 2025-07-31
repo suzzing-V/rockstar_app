@@ -5,12 +5,24 @@ class MainText extends StatelessWidget {
   final String label;
   final Color? color;
 
-  const MainText({super.key, this.fontSize = 25, this.label = "", this.color});
+  final int? maxLines;
+  final TextOverflow? overflow;
+
+  const MainText({
+    super.key,
+    this.fontSize = 25,
+    this.label = "",
+    this.color,
+    this.maxLines,
+    this.overflow,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Text(
       label,
+      maxLines: maxLines, // ✅ 적용
+      overflow: overflow,
       style: TextStyle(
         fontFamily: 'PixelFont',
         fontSize: fontSize,

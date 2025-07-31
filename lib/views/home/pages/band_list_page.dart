@@ -156,12 +156,15 @@ class _BandListPageState extends State<BandListPage> {
                               mainAxisAlignment:
                                   MainAxisAlignment.start, // ✅ 왼쪽 정렬
                               children: [
-                                HighlightText(
-                                  label: band['bandName'],
-                                  fontSize: 23,
+                                Expanded(
+                                  // ✅ 텍스트 줄바꿈을 위해 감싸줌
+                                  child: HighlightText(
+                                    label: band['bandName'],
+                                    fontSize: 23,
+                                  ),
                                 ),
                                 SizedBox(
-                                  width: 5,
+                                  width: 7,
                                 ),
                                 if (band['isManager']) CrownIcon(size: 20),
                               ],

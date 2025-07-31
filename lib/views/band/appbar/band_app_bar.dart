@@ -20,11 +20,14 @@ class BandAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Align(
         alignment: Alignment.centerLeft,
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            MainText(
-              label: bandName,
-              fontSize: 25,
+            Flexible(
+              child: MainText(
+                label: bandName,
+                fontSize: 25,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
