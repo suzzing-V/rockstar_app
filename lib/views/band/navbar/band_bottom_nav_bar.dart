@@ -18,8 +18,9 @@ class BandBottomNavBar extends StatelessWidget {
     return SafeArea(
       bottom: true,
       child: Padding(
-        padding:
-            EdgeInsets.only(bottom: bottomPadding > 0 ? bottomPadding : 40),
+        padding: EdgeInsets.only(
+          bottom: 10,
+        ),
         child: Align(
           alignment: Alignment.bottomCenter, // ✅ 아래 중앙 고정!
           child: ClipRRect(
