@@ -10,6 +10,7 @@ import 'package:rockstar_app/services/api/user_service.dart';
 import 'package:rockstar_app/views/auth/start_page.dart';
 import 'package:rockstar_app/views/band/band_page.dart';
 import 'package:rockstar_app/views/band/pages/pure_schedule_info_page.dart';
+import 'package:rockstar_app/views/home/pages/invitation_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -195,8 +196,23 @@ class _NotificationPageState extends State<NotificationPage> {
                                     ),
                                   ),
                                 );
+                              } else if (type == 'INVITATION') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => InvitationPage(),
+                                  ),
+                                );
+                              } else if (type == 'INVITATION_ACCEPT') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BandPage(
+                                      bandId: noti['contentId'],
+                                    ),
+                                  ),
+                                );
                               }
-                              // TODO: 가입 관련 추가
                             },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 20),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class BandBottomNavBar extends StatelessWidget {
   final int selectedIndex;
-  final ValueChanged<int> onItemSelected;
+  final Function(int) onItemSelected;
 
   const BandBottomNavBar({
     super.key,
@@ -13,53 +13,64 @@ class BandBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 64.5, right: 64.5, bottom: 40),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(50),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            height: 65,
-            color: Theme.of(context)
-                .colorScheme
-                .secondaryContainer
-                .withOpacity(0.5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(3, (index) {
-                final isSelected = selectedIndex == index;
-                final iconData = [
-                  Icons.calendar_month,
-                  Icons.campaign,
-                  Icons.group,
-                ][index];
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-                return GestureDetector(
-                  onTap: () => onItemSelected(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 20),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.2)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Icon(
-                      iconData,
-                      size: 31,
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.onPrimaryContainer
-                          : Colors.grey,
-                    ),
-                  ),
-                );
-              }),
+    return SafeArea(
+      bottom: true,
+      child: Padding(
+        padding:
+            EdgeInsets.only(bottom: bottomPadding > 0 ? bottomPadding : 40),
+        child: Align(
+          alignment: Alignment.bottomCenter, // ✅ 아래 중앙 고정!
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondaryContainer
+                      .withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min, // 내부 요소만큼만 너비
+                  children: List.generate(3, (index) {
+                    final isSelected = selectedIndex == index;
+                    final iconData = [
+                      Icons.calendar_month,
+                      Icons.campaign,
+                      Icons.group,
+                    ][index];
+
+                    return GestureDetector(
+                      onTap: () => onItemSelected(index),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 18),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.2)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Icon(
+                          iconData,
+                          size: 30,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Colors.grey,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
             ),
           ),
         ),
