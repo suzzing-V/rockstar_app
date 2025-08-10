@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:491163937365:android:d7d77160c13dfb0b2782dc",
+        "mobilesdk_app_id": "1:491163937365:android:33b15230e5c9beb82782dc",
         "android_client_info": {
-          "package_name": "com.example.rockstar_app"
+          "package_name": "com.suzzingv.rockstar"
         }
       },
       "oauth_client": [],

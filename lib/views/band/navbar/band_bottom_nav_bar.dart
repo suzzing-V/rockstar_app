@@ -40,7 +40,7 @@ class BandBottomNavBar extends StatelessWidget {
                   children: List.generate(3, (index) {
                     final isSelected = selectedIndex == index;
                     final iconData = [
-                      Icons.calendar_month,
+                      Icons.schedule,
                       Icons.campaign,
                       Icons.group,
                     ][index];

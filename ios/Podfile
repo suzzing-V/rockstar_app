@@ -57,6 +57,8 @@ post_install do |installer|
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
       config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
       config.build_settings['VALIDATE_SWIFT_MODULES'] = 'NO'
+
+      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
     end
 
     # Xcode 16 대응: BoringSSL-GRPC의 경고 플래그 제거

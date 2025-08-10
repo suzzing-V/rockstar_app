@@ -1,4 +1,4 @@
-package com.example.rockstar_app
+package com.suzzingv.rockstar
 
 import io.flutter.embedding.android.FlutterActivity
 

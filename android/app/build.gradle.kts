@@ -16,7 +16,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.rockstar_app"
+    namespace = "com.suzzingv.rockstar"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -31,7 +31,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.rockstar_app"
+        applicationId = "com.suzzingv.rockstar"
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

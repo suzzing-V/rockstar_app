@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '491163937365',
     projectId: 'rockstar-f9295',
     storageBucket: 'rockstar-f9295.firebasestorage.app',
-    iosBundleId: 'com.example.rockstarApp',
+    iosBundleId: 'com.suzzingv.rockstar',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

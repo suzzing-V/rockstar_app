@@ -170,17 +170,27 @@ void main() async {
   _initialMessage = await FirebaseMessaging.instance.getInitialMessage();
 
   // ✅ FCM 토큰 저장
-  String? fcmToken = await FirebaseMessaging.instance.getToken();
-  print('📱 디바이스 FCM 토큰: $fcmToken');
-  if (fcmToken != null) {
-    final prefs = await SharedPreferences.getInstance();
-    String? savedFcmToken = prefs.getString('fcmToken');
-    if (savedFcmToken == null || fcmToken != savedFcmToken) {
-      prefs.setString('fcmToken', fcmToken);
-      prefs.setBool('isFcmTokenUpdated', true);
-    } else {
-      prefs.setBool('isFcmTokenUpdated', false);
+  // ✅ 시뮬레이터일 경우 FCM 토큰 요청 생략
+  if (!Platform.isIOS ||
+      !Platform.environment.containsKey('SIMULATOR_DEVICE_NAME')) {
+    try {
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      print('📱 디바이스 FCM 토큰: $fcmToken');
+      if (fcmToken != null) {
+        final prefs = await SharedPreferences.getInstance();
+        String? savedFcmToken = prefs.getString('fcmToken');
+        if (savedFcmToken == null || fcmToken != savedFcmToken) {
+          prefs.setString('fcmToken', fcmToken);
+          prefs.setBool('isFcmTokenUpdated', true);
+        } else {
+          prefs.setBool('isFcmTokenUpdated', false);
+        }
+      }
+    } catch (e) {
+      print('⚠️ FCM 토큰 가져오기 실패 (시뮬레이터 또는 네트워크 문제): $e');
     }
+  } else {
+    print('🛑 시뮬레이터에서 FCM 토큰 요청 생략됨');
   }
 
   final prefs = await SharedPreferences.getInstance();
@@ -216,6 +226,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         navigatorKey: navigatorKey, // ✅ 여기 중요
         title: 'Rockstar',
         theme: ThemeData(

@@ -5,8 +5,9 @@ import 'package:rockstar_app/common/text/main_text.dart';
 class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onBack;
+  final List<Widget>? actions; // Added actions parameter
 
-  const DefaultAppBar({super.key, required this.title, this.onBack});
+  const DefaultAppBar({super.key, required this.title, this.onBack, this.actions}); // Added to constructor
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +16,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: 0,
+      actions: actions, // Passed actions to AppBar
       leading: CustomBackButton(
         onPressed: onBack ?? () => Navigator.pop(context),
       ),

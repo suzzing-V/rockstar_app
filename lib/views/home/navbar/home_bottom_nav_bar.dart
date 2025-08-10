@@ -35,9 +35,13 @@ class HomeBottomNavBar extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min, // 내부 요소만큼만 너비
-                  children: List.generate(2, (index) {
+                  children: List.generate(3, (index) {
                     final isSelected = selectedIndex == index;
-                    final iconData = index == 0 ? Icons.home : Icons.person;
+                    final iconData = index == 0
+                        ? Icons.home
+                        : index == 1
+                            ? Icons.calendar_month
+                            : Icons.person;
 
                     return GestureDetector(
                       onTap: () => onItemSelected(index),

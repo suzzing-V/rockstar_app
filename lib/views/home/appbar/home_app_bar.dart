@@ -55,7 +55,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const NotificationPage(), // 알림 페이지
+                  builder: (context) => NotificationPage(), // 알림 페이지
                 ),
               );
             },
