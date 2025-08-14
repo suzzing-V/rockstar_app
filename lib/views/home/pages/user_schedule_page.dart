@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:rockstar_app/services/repositories/api_schedule_repository.dart';
 import 'edit_day_page.dart';
 
 /// --------------------
@@ -25,69 +26,11 @@ class DayAvailability {
 }
 
 /// --------------------
-/// 리포지토리(데모 InMemory)
+/// 리포지토리
 /// --------------------
 abstract class ScheduleRepository {
-  Future<Map<DateTime, DayAvailability>> fetchMonth(
-      int userId, DateTime anyDayInMonth);
-  Future<DayAvailability> fetchDay(int userId, DateTime day);
+  Future<Map<DateTime, DayAvailability>> fetchMonth(DateTime anyDayInMonth);
   Future<void> saveDay(int userId, DateTime day, DayAvailability availability);
-}
-
-class InMemoryScheduleRepository implements ScheduleRepository {
-  final Map<String, DayAvailability> _store = {
-    '2025-08-10': DayAvailability.allDayBlocked(),
-    '2025-08-11': const DayAvailability(
-      allDay: false,
-      ranges: [
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(12 * 60, 13 * 60),
-        MinuteRange(19 * 60, 22 * 60)
-      ],
-    ),
-    '2025-08-18': const DayAvailability(
-        allDay: false, ranges: [MinuteRange(10 * 60, 11 * 60)]),
-  };
-
-  String _k(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
-  @override
-  Future<Map<DateTime, DayAvailability>> fetchMonth(
-      int userId, DateTime anyDayInMonth) async {
-    await Future<void>.delayed(const Duration(milliseconds: 120));
-    final first = DateTime(anyDayInMonth.year, anyDayInMonth.month, 1);
-    final next = DateTime(anyDayInMonth.year, anyDayInMonth.month + 1, 1);
-    final days = next.difference(first).inDays;
-    final map = <DateTime, DayAvailability>{};
-    for (int i = 0; i < days; i++) {
-      final d = DateTime(anyDayInMonth.year, anyDayInMonth.month, i + 1);
-      map[d] = _store[_k(d)] ?? DayAvailability.available();
-    }
-    return map;
-  }
-
-  @override
-  Future<DayAvailability> fetchDay(int userId, DateTime day) async {
-    await Future<void>.delayed(const Duration(milliseconds: 80));
-    return _store[_k(day)] ?? DayAvailability.available();
-  }
-
-  @override
-  Future<void> saveDay(
-      int userId, DateTime day, DayAvailability availability) async {
-    await Future<void>.delayed(const Duration(milliseconds: 80));
-    _store[_k(day)] = availability;
-  }
 }
 
 /// --------------------
@@ -125,34 +68,46 @@ List<MinuteRange> _mergeRanges(List<MinuteRange> input) {
 }
 
 /// --------------------
-/// 메인: 유저 스케줄 페이지
+/// 유저 스케줄 페이지
 /// --------------------
 class UserSchedulePage extends StatefulWidget {
   final int userId;
-  final ScheduleRepository repository;
-  UserSchedulePage({
+  final ScheduleRepository? repository;
+  const UserSchedulePage({
     super.key,
     this.userId = 1,
-    ScheduleRepository? repository,
-  }) : repository = repository ?? InMemoryScheduleRepository();
+    this.repository,
+  });
 
   @override
-  State<UserSchedulePage> createState() => _UserSchedulePageState();
+  State<UserSchedulePage> createState() => UserSchedulePageState();
 }
 
-class _UserSchedulePageState extends State<UserSchedulePage> {
+class UserSchedulePageState extends State<UserSchedulePage> {
   late DateTime _monthCursor;
   Map<DateTime, DayAvailability> _monthData = {};
   bool _loading = true;
   DateTime? _selectedDate;
   DayAvailability? _selectedDayAvailability;
+  late ScheduleRepository repository;
 
   @override
   void initState() {
     super.initState();
+    repository = widget.repository ?? ApiScheduleRepository(context: context);
     final now = DateTime.now();
     _monthCursor = DateTime(now.year, now.month, 1);
     _loadMonth();
+  }
+
+
+  void goToCurrentMonth() {
+    final now = DateTime.now();
+    final currentMonth = DateTime(now.year, now.month, 1);
+    if (_monthCursor != currentMonth) {
+      _monthCursor = currentMonth;
+      _loadMonth();
+    }
   }
 
   Future<void> _loadMonth() async {
@@ -161,8 +116,7 @@ class _UserSchedulePageState extends State<UserSchedulePage> {
       _selectedDate = null; // Clear selected date
       _selectedDayAvailability = null; // Clear selected day availability
     });
-    final data =
-        await widget.repository.fetchMonth(widget.userId, _monthCursor);
+    final data = await repository.fetchMonth(_monthCursor);
     setState(() {
       _monthData = data;
       _loading = false;
@@ -257,9 +211,8 @@ class _UserSchedulePageState extends State<UserSchedulePage> {
                       day: dayIndex,
                       bgColor: color,
                       borderColor: borderColor,
-                      onTap: () async {
-                        final detail = await widget.repository
-                            .fetchDay(widget.userId, date);
+                      onTap: () {
+                        final detail = _monthData[date] ?? DayAvailability.available();
                         setState(() {
                           _selectedDate = date;
                           _selectedDayAvailability = detail;
@@ -351,7 +304,7 @@ class _UserSchedulePageState extends State<UserSchedulePage> {
                     .toList();
                 final saved = DayAvailability(
                     allDay: allDay, ranges: _mergeRanges(ranges));
-                await widget.repository.saveDay(widget.userId, date, saved);
+                await repository.saveDay(widget.userId, date, saved);
                 setState(() {
                   _monthData[DateTime(date.year, date.month, date.day)] = saved;
                   _selectedDayAvailability = saved;

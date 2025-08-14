@@ -17,10 +17,11 @@ class _HomePageState extends State<HomePage> {
   String? errorMessage;
 
   int _selectedIndex = 0;
+  final GlobalKey<UserSchedulePageState> _schedulePageKey = GlobalKey<UserSchedulePageState>();
 
-  final List<Widget> _pages = [
+  late final List<Widget> _pages = [
     BandListPage(), // 홈
-    UserSchedulePage(), // 스케줄
+    UserSchedulePage(key: _schedulePageKey), // 스케줄
     UserPage(), // 내 정보
   ];
 
@@ -44,6 +45,11 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _selectedIndex = index;
           });
+          
+          // 달력 탭(index 1)을 클릭할 때 현재 월로 이동
+          if (index == 1) {
+            _schedulePageKey.currentState?.goToCurrentMonth();
+          }
         },
       ),
     );

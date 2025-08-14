@@ -50,7 +50,7 @@ class _EditDayPageState extends State<EditDayPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       appBar: DefaultAppBar(
-        title: '2025.08.18',
+        title: '${widget.date.year}.${widget.date.month.toString().padLeft(2, '0')}.${widget.date.day.toString().padLeft(2, '0')}',
         onBack: () => Navigator.pop(context),
         actions: [
           TextButton(
@@ -524,7 +524,7 @@ class _VerticalPainter extends CustomPainter {
       }
 
       final isHour = (i % hourStep == 0);
-      grid.strokeWidth = isHour ? 1.5 : 1.0;
+      grid.strokeWidth = isHour ? 3.0 : 1.0;
       canvas.drawLine(Offset(0, y), Offset(w, y), grid);
     }
   }
